@@ -1,6 +1,5 @@
-# name = input('Who are you? ')
-# print("Welcome", name)
-
-inpu = input('Europe Floor?')
-usf = int(inpu) + 1
-print('Us Floor :', usf)
+list1 = ["A dog, a cat", "a mouse, a rabbit"]
+b=[]
+for i in list1:
+ b+=i.split(",")
+print(b)
