@@ -1,8 +1,9 @@
-class User:
-    def __init__(self, user_id, username):
-        self.id = user_id
-        self.username = username
-
-user_1 = User("youngpanda", "황호영")
-print(user_1.username)
-print(user_1.id)
+n = int(input())
+for i in range(1,n+1):
+    if i%10==3:
+        print("X", end=" ")
+    elif i%10==6:
+        print("X", end=" ")
+    elif i%10==9:
+        print("X", end=" ")
+    else: print(i, end=" ")
