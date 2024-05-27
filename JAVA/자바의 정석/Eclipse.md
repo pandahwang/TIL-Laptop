@@ -11,12 +11,13 @@ class - 자바 프로그램의 단위;
 main method (메서드) - 자바 프로그램의 시작점. 이 메서드 없이는 실행불가;  
 //메서드 : 함수  
 
-java  
+```java  
 class Eclipse {
     public static void main (String[]args) {
         System.out.println(4+5);
     }
 }  
+```
 ## 단축키
 > ctrl + shift + L // 단축키 목록  
 ctrl + +, - // 폰트 크기 조절  
