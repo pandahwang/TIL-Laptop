@@ -31,4 +31,4 @@ ctrl + / // 주석(토글)
 ctrl + space // 자동완성
 
 
-
+우클릭 - Source - Getter Setter  
