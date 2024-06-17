@@ -1,77 +1,122 @@
 <!DOCTYPE html>
 <html lang="kor">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>상품 소개 페이지</title>
+    <title>Document</title>
 </head>
 <body>
-    <h2>레드향 샐러드 레시피</h2>
-    <p><b>재료:</b> 레드향 1개, 아보카도 1개~~</p>
-    <p><b>드레싱:</b> 올리브유 1큰술 , ~~</p>
-    <h4>재료 준비</h4>
-    
-    <ul type="a">
-        <li>샐러드 채소를 씻어</li>
-        <li>레드향과 아보카도 썰어</li>
-    </ul>
-    <h4>드레싱 준비</h4>
+    <form action="">
+        <fieldset>
+        <legend>배송 정보</legend>
     <ul>
-        <li>드레싱 재료를 갈어</li>
+        <li>
+            <label for="user_name">이름</label>
+            <input type="text" id="user_name">
+        </li>
+        <li>
+            <label for="addr">배송 주소</label>
+            <input type="text" id="addr">
+        </li>
+        <li>
+            <label for="mail">이메일 주소</label>
+            <input type="email" id="mail" placeholder="exmaple@gmail.com">
+        </li>
+        <li>
+            <label for="phone">연락처</label>
+            <input type="tel" id="phone">
+        </li>
     </ul>
-    <h4>샐러드 완성</h4>
-    <ul type="a", start="4">
-        <li>볼에 샐러드 채소와 레드향, 아보카도 ~~~ 완성! </li>
-    </ul>
-
-    <h2>일정</h2>
-    <ul>
-        <li>입춘맞이 : 1/27(월) ~ 1/31(금)</li>
-        <li>낭쉐코사 : 2/1(토)</li>
-        <li>거리굿 : 2/2(일)</li>
-        <li>열림굿 : 2/3(월)</li>
-        <li>입춘굿 : 2/4(화)</li>
-    </ul>
+    </fieldset>
+</form>
     <table>
-        <th>제목</th>
-        <tr><td>asdf</td><td>asdf</td><td>asdf</td></tr>
-        <tr>asdf<td>asdf</td><td>asdf</td><td>asdf</td></tr>
-        <tr><td></td><td></td><td></td></tr>
-        <tr><td></td><td></td><td></td></tr>
+        <tr>
+            <td><input type="text" placeholder="ID"></td>
+            <td rowspan="2"><input type="submit" value="로그인"></td>
+        </tr>
+        <tr>
+            <td><input type="password" placeholder="Password"></td>
+        </tr>
     </table>
-    <br>
-    <h2>상품 구성</h2>
-    
-    <table cellspacing="5" border="1" > 
-        <caption>선물용과 가정용 상품 구성</caption>
-        <colgroup>
-            <col style="background-color: #eee;">
-            <col>
-            <col span="2" style="width: 150px;">
-        </colgroup>
-        <thead>
-            <tr>
-                <th>용도</th><th>중량</th><th>개수</th><th>가격</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td rowspan="2">선물용</td><td>3kg</td><td>11~16과</td><td>35,000원</td>
-            </tr>
-            <tr>
-                <td>5kg</td><td>18~26과</td><td>52,000원</td>
-            </tr>
-            <tr>
-                <td rowspan="2">가정용</td><td>3kg</td><td>11~16과</td><td>30,000원</td>
-            </tr>
-            <tr>
-                <td>5kg</td><td>18~26과</td><td>47,000원</td>
-            </tr>
-        </tbody>
-        <tfoot>
-        </tfoot>
-    </table>
-    <br>
+
+    <form action="">
+          <fieldset>
+            <legend><b>상품 선택</b></legend>
+            <p><b>주문할 상품을 선택해주세요</b></p>
+            <label for=""><input type="checkbox" value="s_3">선물용 3kg</label>
+            <label for=""><input type="checkbox" value="s_5">선물용 5kg</label>
+            <label for=""><input type="checkbox" value="f_3">가정용 3kg</label>
+            <label for=""><input type="checkbox" value="f_5">가정용 5kg</label>
+            <p><b>포장 선택</b></p>
+            <label for=""><input type="radio" name="gift" value="yes">선물 포장</label>
+            <label for=""><input type="radio" name="gift" value="no">선물 포장 안 함</label>
+            </fieldset>
+        </form>
+        <fieldset>
+        <ul>
+            <li>
+                <label><input type="checkbox">선물용 3kg</label>
+                <input type="number" min="0" max="5">개 (최대 5개)
+            </li>
+            <li>
+            <label><input type="checkbox" value="s_5">선물용 5kg</label>
+            <input type="range" min="0" max="3" value="1">개 (최대 3개)
+            </li>
+        </ul>
+        </fieldset>
+        <input type="date" min="2020-02-01" max="2020-02-15">
+        <input type="month" name="" id="">
+        <input type="week" name="" id="">
+        
+        <form action="">
+            <input type="button" value="공지 창 열기" onclick="window.open('notice.html')">
+            <input type="file" name="" id="">
+        </form>
+
+
+            <style>
+                #shipping li label {
+                    width:80px;
+                    float:left;
+                    text-align:left;     
+                    }
+                    input[type="text"], input[type="tel"], input[type="email"] {
+                    width:300px;
+                    }
+                    ul{
+                        list-style: none;
+                    }
+            </style>
+        <form action="">
+
+            <fieldset>
+                <legend><b>배송 정보</b></legend>
+                <ul>
+                <li><label for="user_name">이름</label>
+                    <input type="text" id="user_name" autofocus>
+                </li>
+                <li>
+                <label for="user_addr">배송 주소</label>
+                    <input type="text" id="user_addr">
+                </li>
+                <li>
+                    <label>이메일<input type="email" id="user_email" required></label>
+                </li>
+                <li>
+                    <label>연락처<input type="tel" id="user_tel" placeholder="하이픈 빼고 입력해 주세요.(01012345678)"></label>
+                </li>
+                <li>
+                    <label>배송 지정 <input type="date" id="user_date">(주문일로부터 최소 3일 이후)</label>
+                </li>
+                <li>
+                    <label>회원번호<input type="text" readonly value="0101230"></label>
+                </li>
+            </ul>
+            </fieldset>
+            <div id="buttons">
+                <input type="submit" value="주문하기"> 
+                <input type="reset" value="취소하기">
+              </div>        
+        </form>
 </body>
 </html>
