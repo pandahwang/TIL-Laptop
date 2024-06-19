@@ -15,7 +15,7 @@
             <ul>
                 <li>
                     <label for="user_id">아이디</label>
-                    <input type="text" autofocus>
+                    <input type="text" autofocus required placeholder="4자 ~ 10자 사이, 공백 없이">
                 </li>
                 <li>
                     <label for="user_email">이메일</label>
@@ -23,7 +23,7 @@
                 </li>
                 <li>
                     <label for="user_pw">비밀번호</label>
-                    <input type="password" id="user_pw" required>
+                    <input type="password" id="user_pw" required placeholder="문자와 숫자, 특수 기호 포함">
                 </li>
                 <li>
                     <label for="user_pw2">비밀번호 확인</label>
@@ -43,7 +43,21 @@
             <input type="reset" value="취소">
         </div>
     </form>
-
+    <br>
+    <label for="prod1">상품 선택</label>
+        <select id="prod1">
+            <option value="special_3" selected>선물용 3kg</option>
+            <option value="special_5">선물용 5kg</option>
+            <option value="family_3" selected>가정용 3kg</option>
+            <option value="family_5">가정용 5kg</option>
+        </select>
+        <br>
+        <label for="prod2">포장 여부</label>
+        <input type="text" id="prod2" list="package">
+        <datalist id="package">
+            <option value="package">선물 포장</option>
+            <option value="non-package">포장 안 함</option>
+        </datalist>
 </body>
 
 </html>
