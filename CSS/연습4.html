@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="kor">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * { box-sizing: border-box;}    /* 모든 요소에 테두리까지 포함한 너빗값 지정 */
+        ul{ list-style-type: none; }
+        li{
+            background-color: wheat;
+            border: 1px solid black;
+            padding: 20px;
+            margin: 0 20px;
+            display: inline-block;
+        }
+        h1 {
+            border: 1px solid red;
+            /* display: inline; */
+        }
+        h2 {
+            border: 1px solid black;
+            display: inline;
+        }
+        span{
+            border: 1px dotted blue;
+            /* display: block; */
+        }
+        a {
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>얘는 블록인데 안 바꿨음
+        <h2>이거 원래 블록임<span>이건 인라인임</span><br>
+        <span style="display: block;">이건 원래 인라인임</span></h2>
+        
+    </h1>
+    <nav>
+        <ul>
+            <li><a href="https://google.com/">구글로 연결</a></li>
+            <li><a href="https://naver.com/">네이버로 연결</a></li>
+            <li><a href="https://daum.net/">다음으로 연결</a></li>
+            <li><a href="https://yahoo.com/">야후로 연결</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
