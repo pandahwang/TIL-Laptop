@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="kor">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ainsley Spin</title>
+    <style>
+        img {
+            border: 1px solid white;
+            box-shadow: 5px 5px 2px gray;
+            border-radius: 70%;
+            animation-name: rotate;
+            animation-duration: 1s;
+            animation-direction: alternate;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+        }
+        @keyframes rotate {
+            from { transform: perspective(10px) rotate3d(2.5, 1.2, -1.5, 50deg); }
+            50% { transform: perspective(10px) rotate3d(10, 2, 30, -55deg); }
+            to { transform: perspective(10px) rotate3d(55, 12, 120, 160deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        <img src="Ainsley-Harriott.jpg" alt="">
+    </div>
+</body>
+</html>

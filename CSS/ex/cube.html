@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="kor">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+.cube-wrapper {
+    width: 100px;
+    height: 100px;
+    transform-style: preserve-3d;
+    transform: perspective(700px);
+    position: relative;
+    left: calc(50vw - 50px);
+    top: calc(30vh - 50px);
+    transition: 0.3s;
+    animation: turn 3s infinite alternate;
+}
+@keyframes turn {
+    from{ transform: perspective(700px); }
+    30%{ transform: perspective(700px) rotate3d(100, 100, 0, 180deg);}
+    60%{ transform: perspective(700px) rotate3d(100, 100, 0, 360deg);}
+    90%{ transform: perspective(700px) rotate3d(0, 0, 100, 360deg);}
+    to{ transform: perspective(700px) rotate3d(0, 0, 100, 0deg);}
+    
+}
+.cube-wrapper:hover {
+    transform: perspective(700px) rotate3d(100, 100, 0, 45deg);
+}
+.cube-wrapper > div {
+	position: absolute;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    line-height: 100px;
+   	font-weight: bold;
+    font-size: 20px;
+}
+.cube-front {
+    color: #FF0000;
+    background-image: url("Ainsley-Harriott.jpg");
+    transform: translate3d(0, 0, 50px);
+    background-size: cover;
+}
+.cube-back {
+    color: #0000FF;
+    background-image: url("Ainsley-Harriott.jpg");
+    transform: rotateY(180deg) translate3d(0, 0, 50px);
+    background-size: cover;
+}
+.cube-top {
+    color: #FFFF00;
+    background-image: url("Ainsley-Harriott.jpg");
+    transform: rotateX(90deg) translate3d(0, 0, 50px);
+    background-size: cover;
+}
+.cube-bottom {
+    color: #de0081;
+    background-image: url("Ainsley-Harriott.jpg");
+    transform: rotateX(-90deg) translate3d(0, 0, 50px);
+    background-size: cover;
+}
+.cube-left {
+    color: #00FF00;
+    background-image: url("Ainsley-Harriott.jpg");
+    transform: rotateY(-90deg) translate3d(0, 0, 50px);
+    background-size: cover;
+}
+.cube-right {
+    color: #f77c1c;
+    background: url("Ainsley-Harriott.jpg");
+    background-size: cover;
+    transform: rotateY(90deg) translate3d(0, 0, 50px);
+}
+    </style>
+</head>
+<body>
+    <div class="cube-wrapper">
+        <div class="cube-front">Front</div>
+        <div class="cube-back">Back</div>
+        <div class="cube-top">Top</div>
+        <div class="cube-bottom">Bottom</div>
+        <div class="cube-left">Left</div>
+        <div class="cube-right">Right</div>
+    </div>
+</body>
+</html>
+<h2>Raise the mouse pointer.</h2>
