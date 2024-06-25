@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ma website</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background-color: aquamarine; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #box1 {
+            background-color: lightpink;
+            text-align: center;
+            width: 40px;
+            height: 40px;
+        }
+        #msg {
+            background-color: white;
+            text-align: center;
+            width: 30px;
+            height: 30px;
+            font-size: 10pt;
+            border-radius: 50%;
+            display: none;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="container">
+        <button id="box1">
+            '-'
+        </button>
+    </div>
+    <p id="msg">
+       !!!!! 
+    </p>
+    <script>
+        document.querySelector('#box1').onclick = () =>{
+            document.querySelector('#msg').style.display = "block";
+            setTimeout(function() {
+                document.querySelector('#msg').style.display = "none";
+            }, 500);
+        };
+
+        // function close() {
+        //     document.querySelector('#msg').style.display = "none";
+        // }
+
+    </script>
+</body>
+</html>
