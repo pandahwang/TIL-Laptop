@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이벤트 공지</title>
+  <style>
+    #container 
+    {
+      width:600px;
+      margin:10px auto;
+      padding:10px;
+      text-align:center;
+    }        
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>이벤트 공지</h1>
+    <img src="images/doit.jpg">
+    <p><a href="doit-main.html" onclick="loadURL(this.href); return false;">자세히 보기</a></p>  
+    <!--a를 클릭했을 때, a의 href를 인수로 받는 loadURL 함수를 실행. -->
+    <!--return false;는 링크를 클릭했을 때의 기본 동작(링크 연결)을 취소한다는 뜻. -->
+  </div>
+  <script>
+    function loadURL(url){
+      window.opener.location = url;
+      window.close();
+    }
+    // window의 opener 속성에는 부모 창이 저장되어 있음.  
+    // 부모 창의 location에 인수 url을 넘겨줌.  
+
+    // a를 클릭하면 부모의 현재 주소(window.opener.location)를 a.href로 바뀌게 됨.
+  </script>
+</body>
+</html>

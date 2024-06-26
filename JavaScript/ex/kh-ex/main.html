@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>팝업 창 열기</title>
+</head>
+<body>
+  <p>문서를 열면 팝업 창이 표시됩니다.</p> 
+  <script>
+    // window.open("doit-event.html", "popup", "width=750, height=600");
+    const popWin = window.open("doit-event.html", "popup", "width=750, height=600");
+    popWin.opener = self;
+    // 새로운 창을 열 때, window 객체가 만들어짐. 이 객체를 popWin 변수에 담음.
+    // window객체의 opener는, 부모 창 객체를 담을 수 있음. 기본값은 비어있음.
+    // "팝업 창의 window 객체"의 opener 속성에 main.html(self)를 담음.
+    // 즉, 팝업창인 doit-event의 부모를, main.html로 설정함.
+  </script>
+</body>
+</html>
