@@ -11,12 +11,19 @@
         }
         body {
             background-color: aquamarine; 
+            position: relative;
             /* display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh; */
         }
-        #box1 {
+        #container {
+            margin: auto;
+            border: 2px lightgreen solid;
+            width: 1500px;
+            height: 700px;
+        }
+        #box {
             position: absolute;
             top: 0;
             left: 0;
@@ -24,9 +31,12 @@
             text-align: center;
             width: 40px;
             height: 40px;
-            transform: translate(-50%, -50%);
+            transition: 1s;
         }
         #msg {
+            position: absolute;
+            top: 0px;
+            left: 0px;
             background-color: white;
             text-align: center;
             width: 30px;
@@ -38,27 +48,35 @@
     </style>
 </head>
 <body>
-        <button id="box1">
+    <div id="container">
+        <button id="box">
             '-'
         </button>
-    <p id="msg">
-       !!!!! 
-    </p>
+        <p id="msg">
+            !!!!! 
+        </p>
+    </div>
+</body>
     <script>
-        document.querySelector('#box1').onclick = () =>{
-            document.querySelector('#msg').style.display = "block";
-            setTimeout(function() {
-                document.querySelector('#msg').style.display = "none";
-            }, 500);
-        };
-
         const box = document.querySelector('#box');
-        document.addEventListener("mousemove", (e) => {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
+        const msg = document.querySelector('#msg');
+        
+        
+        box.addEventListener("click", (e) =>{
+            msg.style.top = (e.clientY-15)+"px";
+            msg.style.left = (e.clientX+15)+"px";
+            console.log(e.pageX +":"+e.pageY);
+            msg.style.display = "inline";
+            setTimeout(() => {
+                    msg.style.display = "none";
+                }, 500);
+            });
+            
+            document.querySelector("html").addEventListener("mousemove", (e) => {
+            const mouseX = e.clientX-17;
+            const mouseY = e.clientY-17;
             box.style.left = mouseX + 'px';
             box.style.top = mouseY + 'px';
         });
     </script>
-</body>
 </html>
