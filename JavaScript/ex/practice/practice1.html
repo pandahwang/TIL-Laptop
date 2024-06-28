@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연습문제1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 30px;
+            width: 70%;
+        }
+        #container {
+            border: 1px solid red;
+            width: 70%;
+            height: 200px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Practice1</h1>
+        <form action="">
+            <fieldset>
+                <legend>취미</legend>
+                <label for="category">
+                    <input type="checkbox" name="category" id="all" value="전체선택">전체선택
+                    <input type="checkbox" name="category" class="notall" value="종합">종합
+                    <input type="checkbox" name="category" class="notall" value="소설">소설
+                    <input type="checkbox" name="category" class="notall" value="시/에세이">시/에세이
+                    <input type="checkbox" name="category" class="notall" value="경제/경영">경제/경영
+                    <input type="checkbox" name="category" class="notall" value="자기계발">자기계발
+                    <input type="checkbox" name="category" class="notall" value="아동">아동
+                    <br>
+                    <input type="checkbox" name="category" class="notall" value="여행">여행
+                    <input type="checkbox" name="category" class="notall" value="과학">과학
+                    <input type="checkbox" name="category" class="notall" value="역사/문화">역사/문화
+                    <input type="checkbox" name="category" class="notall" value="외국어">외국어
+                    <input type="checkbox" name="category" class="notall" value="컴퓨터">컴퓨터
+                    <input type="checkbox" name="category" class="notall" value="만화">만화
+                </label>
+            </fieldset>
+    </form>
+    <button>카테고리 선택</button>
+    <div id="container"></div>
+
+    <script>
+        const checkboxes = document.querySelectorAll(".notall");
+        const checkAll = document.querySelector("#all");
+        const button = document.querySelector("button");
+        const container = document.querySelector("#container");
+
+        button.addEventListener("click", getValue);
+
+        checkAll.addEventListener("click", (e) => {
+            checkboxes.forEach(function(checkbox){
+                checkbox.checked = checkAll.checked;
+            })
+            // if(e.target.checked){
+            //     checkboxes.forEach(function(checkbox){
+            //         checkbox.checked = true;
+            //     });
+            // }
+            // else {
+            //     checkboxes.forEach(function(checkbox){
+            //         checkbox.checked = false;
+            //     });
+            // }
+        });
+        for(let i=0; i<checkboxes.length; i++){
+            checkboxes[i].addEventListener("click", isCheckedAll);
+        }
+        
+        function isCheckedAll() {
+            let toggle;
+            for(let i=0; i<checkboxes.length; i++){
+                if(!checkboxes[i].checked){
+                    toggle = false;
+                }
+                else {
+                    for(let k=0; k<checkboxes.length; k++){
+                        if(checkboxes[k].checked){
+                            toggle=true;
+                        }
+                        else toggle=false;
+                    }
+                    checkAll.checked = toggle;
+                }
+            }
+        }
+
+        function getValue() {
+            const myNode = document.createElement("p");
+            for(let i=0; i<checkboxes.length; i++){
+                if(checkboxes[i].checked){
+                    const textNode = document.createTextNode(checkboxes[i].value+" ");
+                    myNode.appendChild(textNode);
+                }
+            }
+            container.appendChild(myNode);
+        }
+    </script>
+</body>
+</html>

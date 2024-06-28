@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>연습문제 2</title>
+	<style>
+		input {
+			width: 2em;
+			height: 1.5em;
+			text-align: center;
+			border: 1px solid #888;
+		}
+		button {
+			margin: 10px;
+		}
+		table, td {
+			border: 1px solid #ccc;
+			border-collapse: collapse;
+		}
+		td {
+			padding: 8px;
+			width: 5em;
+		}
+	</style>
+</head>
+<body>
+	<h1>To do List</h1>
+	<form action="">
+		<input type="text" name="" id="rows">행
+		<input type="text" name="" id="cols">열
+		<button> 작성 </button>
+	</form>
+	<script>
+		// 요소들을 변수에 저장
+		const rows = document.querySelector("#rows");
+		const cols = document.querySelector("#cols");
+		const button = document.querySelector("button");
+		// 버튼 클릭 이벤트 리스너
+		button.addEventListener("click", (e) =>{
+			// 버튼의 기존 기능을 비활성화
+			e.preventDefault();
+
+			// div 노드 생성
+			const myDiv = document.createElement("div");
+			// id 속성 생성 후 속성값 지정
+			const myDivId = document.createAttribute("id");
+			myDivId.value = "myDiv";
+			// div 노드에 id 속성 노드를 연결
+			myDiv.setAttributeNode(myDivId);
+			
+			// table 노드 생성
+			const myTable = document.createElement("table");
+			// 입력받은 rows값만큼 tr을, cols값만큼 td를 생성
+			for(let i=0; i<rows.value;i++){
+				const newTr = document.createElement("tr");
+				for(let k=0; k<cols.value;k++){
+					const newTd = document.createElement("td");
+					// 텍스트 노드 생성 후 td 노드에 연결
+					const newTdText = document.createTextNode(i+", "+k);
+					newTd.appendChild(newTdText);
+					// tr 노드에 td 노드 연결
+					newTr.appendChild(newTd);
+				}
+				// table 노드에 tr 노드 연결
+				myTable.appendChild(newTr);
+			}
+			// div 노드에 table 노드 연결
+			myDiv.appendChild(myTable);
+			// body 노드에 div 노드 연결
+			document.querySelector("body").appendChild(myDiv);
+		})
+	</script>
+</body>
+</html>

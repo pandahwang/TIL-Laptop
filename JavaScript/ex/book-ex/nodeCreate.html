@@ -12,27 +12,27 @@
     <p>공부할 주제를 기록해 보세요</p>
     <form action="">
       <input type="text" id="subject" autofocus>
-      <button type="submit">추가</button>
+      <button>추가</button>
     </form>
     <hr>  
     <ul id="itemList"></ul>  
   </div>
 </body>
 <script>
-  const button = document.querySelector("button");
+  const button = document.xquerySelector("button");
   const subject = document.querySelector("#subject");
   const itemList = document.querySelector("#itemList");
 
-button.addEventListener("click", addSubject);
+  button.addEventListener("click", addSubject);
 
-function addSubject(e) {
-  const itemNode = document.createElement("li");
-  const typedText = subject.nodeValue;
-  const itemTextNode = document.createTextNode(subject.value);
-  itemNode.appendChild(itemTextNode);
-  itemList.appendChild(itemNode);
-  e.preventDefault();
-  subject.value = "";
+  function addSubject(e) {
+    const itemNode = document.createElement("li");
+    const typedText = subject.nodeValue;
+    const itemTextNode = document.createTextNode(subject.value);
+    itemNode.appendChild(itemTextNode);
+    itemList.appendChild(itemNode);
+    e.preventDefault();
+    subject.value = "";
 }
 
 </script>
