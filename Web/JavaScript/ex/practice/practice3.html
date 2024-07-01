@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연습문제3</title>
+</head>
+<style>
+input, button {
+    margin: 10px;
+}
+</style>
+<body>
+    <form action="">
+        <fieldset>
+            <legend>회원가입</legend>
+            <label id="아이디 입력란">아이디 : <input type="text" id="user_id"></label><br>
+            <label id="비밀번호 입력란">비밀번호 : <input type="password" id="user_pw"></label> <br>
+            <label id="비밀번호 확인란">비밀번호 확인 : <input type="password" id="user_pw2"></label><br>
+            <label id="이름 입력란">이름 : <input type="text" id="user_name"></label><br>
+            <button>회원가입</button>
+        </fieldset>
+    </form>
+    <script>
+        // 요소들 변수에 저장
+        const user_id = document.querySelector("#user_id");
+        const user_pw = document.querySelector("#user_pw");
+        const user_pw2 = document.querySelector("#user_pw2");
+        const user_name = document.querySelector("#user_name");
+        
+        // 아이디 중복 안내 문구 요소 생성
+        const isIdValid = document.createElement("span");
+        user_id.parentNode.appendChild(isIdValid);
+
+        // 비밀번호 확인 안내 문구 요소 생성
+        const isPwValid = document.createElement("span");
+        user_pw2.parentNode.appendChild(isPwValid);
+
+        // 변수들을 배열에 저장
+        const forms = [user_id, user_pw, user_pw2, user_name];
+        let ids=["user01"];
+
+        // 버튼 클릭 시, 수행할 이벤트. 모든 조건 검사.
+        document.querySelector("button").addEventListener("click", (e)=>{
+            e.preventDefault();
+            let isCheckForms = checkforms();
+            let isCheckId = checkId();
+            let isCheckPw = checkPw();
+            
+            if(isCheckForms==true && isCheckId && isCheckPw === true){
+                ids.push(user_id.value);
+                alert(user_name.value+"님, 회원가입이 성공적으로 완료되었습니다.");
+                forms.forEach(function(form){
+                    form.value="";
+                })
+            }
+            else if(isCheckId === false) {
+                alert("사용할 수 없는 아이디입니다.")
+                user_id.value = "";
+                user_id.focus();
+            }
+            else if(isCheckPw === false) {
+                alert("비밀번호가 일치하지 않습니다.")
+                user_pw2.value = "";
+                user_pw2.focus();
+            }
+        });
+
+        user_id.addEventListener("keyup", checkId);
+        user_pw2.addEventListener("blur", checkPw);
+
+        // 버튼 클릭 시 수행할 이벤트. 모든 요소들이 채워져있는지 확인.
+        function checkforms() {
+            for(let i=0;i<forms.length;i++){
+                if(forms[i].value===""){
+                    alert(forms[i].parentNode.id + "을 입력해주세요.");
+                    forms[i].focus();
+                    isCheckForms = false;
+                    break;
+                }
+                else isCheckForms = true;
+            }
+            return isCheckForms;
+        }
+
+        // id 중복 체크
+        function checkId(){
+            if(ids.includes(user_id.value)){
+                isIdValid.innerText = "중복된 아이디입니다."
+                isIdValid.style.color = "red";
+                isCheckId = false;
+            }
+            else {
+                isIdValid.innerText = "사용 가능한 아이디입니다.";
+                isIdValid.style.color = "green";
+                isCheckId = true;
+            }
+            return isCheckId;
+        }
+
+        // 비밀번호 확인
+        function checkPw(){
+            if(user_pw.value !== user_pw2.value){
+                isPwValid.innerText = "비밀번호가 일치하지 않습니다."
+                isPwValid.style.color = "red";
+                isCheckPw = false;
+            }
+            else {
+                isPwValid.innerText = "비밀번호가 일치합니다.";
+                isPwValid.style.color = "green";
+                isCheckPw = true;
+            }
+            return isCheckPw;
+        }
+
+        
+    </script>
+</body>
+</html>

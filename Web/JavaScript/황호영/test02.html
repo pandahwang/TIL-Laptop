@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        ul {
+            list-style: none;
+        }
+        #container {
+            padding-top: 50px;
+            border: 2px solid #ccc;
+            background-color: rgb(237, 237, 237);
+            width: 600px;
+            height: 500px;
+            font-size: 16px;
+            text-align: center;
+        }
+        table {
+            margin: 20px auto;
+            width: 90%;
+            height: 100%;
+        }
+        td {
+            text-align: left;
+            font-weight: bold;
+        }
+        tr {
+            height: 30px;
+        }
+        input{
+            border: none;
+            border-bottom: dashed 2px black;
+            background-color: rgb(237, 237, 237);
+            width: 90%;
+            height: 20px;
+        }
+        input[type="email"] {
+            width: 42%;
+        }
+        button {
+            background-color: rgb(197, 224, 180);
+            border: none;
+            width: 90%;
+            height: 50px;
+            margin: 10px auto;
+            margin-top: 100px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        span {
+            color: red;
+            font-size: 10px;
+        }
+        #pwNotice {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <form>
+            <table>
+                <tr>
+                    <td rowspan="2">아이디</td>
+                    <td><input type="text" id="user_id"></td>
+                </tr>
+                <tr>
+                    <td><span id="idNotice"></span></td>
+                </tr>
+                <tr>
+                    <td rowspan="2">패스워드</td>
+                    <td><input type="password" id="user_pw"></td>
+                </tr>
+                <tr>
+                    <td><span id="pwNotice"></span><br><span id="pwNotice2"></span></td>
+                </tr>
+                <tr>
+                    <td rowspan="2">패스워드 확인</td>
+                    <td><input type="password" id="user_pw2"></td>
+                </tr>
+                <tr>
+                    <td><span id="pw2Notice"></span></td>
+                </tr>
+                <tr>
+                    <td>이메일</td>
+                    <td><input type="email" id="user_email">@<input type="email"></td>
+                </tr>
+                <tr>
+                    <td rowspan="2">주소</td>
+                    <td><input type="text" id="user_address"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" id="user_address2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button>가 입</button></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <script>
+        const user_pw = document.querySelector("#user_pw");
+        user_pw.addEventListener("focus", password_notice);
+        user_pw.addEventListener("blur", () => {document.querySelector("#pwNotice").innerHTML = "";});
+
+        function password_notice() {
+            document.querySelector("#pwNotice").innerHTML = "영문자 대/소문자 특수문자, 숫자 포함 8~ 32자";
+        }
+
+        const inputs = document.querySelectorAll("input");
+        for(let i=0; i<3; i++) {
+            inputs[i].addEventListener("blur", (e) => {
+                let required_notice;
+                if (e.target.value === "") {
+                    switch(""){
+                        case user_id.value : required_notice = document.querySelector("#idNotice");
+                            required_notice.innerHTML = "필수 입력 항목입니다.";
+                            break;
+                        case user_pw.value : required_notice = document.querySelector("#pwNotice2");
+                            required_notice.innerHTML = "필수 입력 항목입니다.";
+                            break;
+                        case user_pw2.value : required_notice = document.querySelector("#pw2Notice");
+                            required_notice.innerHTML = "필수 입력 항목입니다.";
+                            break;
+                    }
+                }
+                else {
+                    const allSpan = document.querySelectorAll("span");
+                        allSpan.forEach(function(span){
+                            span.innerHTML = "";
+                        });
+                    }
+                }
+            );
+        }
+    </script>
+</body>
+</html>
