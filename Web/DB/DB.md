@@ -236,6 +236,7 @@ ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.
 이를 보완한 것이 PL/SQL.  
 
 ## 사용법  
+사용한 SQL 프로그램 : Oracle SQL Developer  
 - 데이터베이스 접속 예시  
     1. 접속(ID/PW)  
     2. DB 선택  
@@ -260,9 +261,9 @@ ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.
     ![alt text](../../image/scottdb_salgrade.png)  
     table 구성 요소는 대문자로 적는 것을 권장.  
 
-### 데이터 조회  
+## 데이터 조회  
 
-#### SELECT문  
+### SELECT문  
 데이터를 선택하는 명령어.  
 
 셀렉션 : 행 단위로 데이터를 선택(조회)함.  
@@ -278,9 +279,8 @@ SELECT문은 FROM절과 함께 사용함.
 ```
 SELECT [옵션] [조회할 열1 이름], [열2 이름], ... , [열N 이름]
 FROM [조회할 테이블 이름]
-WHERE [조건]
 ```
-- 옵션  
+- #### 옵션  
     - DISTINCT 옵션  
     SELECT문은 데이터를 선택할 때, 같은 값들도 중복해서 선택됨.  
     DISTINCT 옵션을 넣으면, 데이터를 선택할 때, 중복된 값은 선택하지 않음.  
@@ -288,10 +288,11 @@ WHERE [조건]
     - ALL 옵션  
     SELECT문의 기본값.  
 
-- 별칭(ALIAS)  
-    컬럼의 이름을 숨기거나,  
-    SELECT문에 산술연산 구문을 넣으면, 그대로 수행하고 칼럼명도 그대로 출력되는데, 칼럼명을 지정할 수 있음.  
+- #### 별칭(ALIAS)  
     별칭을 붙일 칼럼 뒤에 작성함.  
+    컬럼의 이름을 바꾸거나,  
+    SELECT문에 산술연산 구문을 넣으면, 그대로 수행하고 칼럼명도 그대로 출력되는데, 이 때 칼럼명을 지정하는 용도로 쓰임.  
+    내부 프로그램에서 수행하는 실행문을 숨길 때도 자주 사용함.  
     ```
     [별칭을 붙일 칼럼] [별칭]
     [별칭을 붙일 칼럼] ["별칭"]
@@ -300,16 +301,195 @@ WHERE [조건]
     ```
     
     #### 산술연산할 때 대상으로 null 값이 들어가면, 결과가 null이 되어버림.  
-    
-- WHERE 조건  
-    - 비교 연산자  
-        = , >, <, >=, <=  
-        <>, !=, ^= (다르다)  
-    - 논리 연산자
-        AND, OR , NOT  
-    - BETWEEN AND, NOT BETWEEN AND 연산자  
 
-    - IN 연산자  
+- #### ORDER BY 절  
+SELECT문을 사용할 때, 가장 마지막 부분에 씀.  
+특정 기준으로 데이터를 정렬할 때 사용함.  
 
-    - LIKE 연산자 + 와일드카드  
+기준컬럼을 여러 개로 지정할 수 있음.  
+이 때, 가장 앞에 있는 칼럼의 우선순위가 가장 높음  
+```
+SELECT ...
+FROM ...
+...
+ORDER BY [기준컬럼1] [ASC | DESC], [기준칼럼2] [ASC | DESC], ...
+```
+ASC : 오름차순 (기본값)  
+DESC : 내림차순  
 
+ORDER BY 절은 꼭 필요한 경우가 아니면 사용하지 않는 것이 좋음.  
+데이터의 양, 정렬 방식에 따라 SQL문의 효율이 낮아질 수 있기 때문.  
+
+- #### WHERE 절  
+IF문 조건과 유사함.  
+특정 조건을 기준으로, 원하는 행을 선택할 때 사용함.  
+
+SELECT ~ FROM이 먼저 수행되어 정보를 가져오고, 그 후에 WHERE로 필터링하여 선택함.  
+(한 행마다 조건을 판별함)  
+
+```
+SELECT ...
+FROM ...
+WHERE [조건식]
+```
+조건식이 참인 경우의 데이터만을 출력  
+WHERE 조건의 개수 제한은 없음.  
+
+- #### 연산자  
+  - 산술 연산자  
+    +, -, *, /  
+  - 비교 연산자  
+      = , >, <, >=, <=  
+      <>, !=, ^= (다르다)  
+      문자, 문자열에도 쓸 수 있음.  
+  - 논리 연산자
+      AND, OR , NOT  
+      NOT은 다른 연산자들과 함께 많이 쓰임  
+  - BETWEEN AND, NOT BETWEEN AND 연산자  
+    ```
+    WHERE column_name BETWEEN value1 AND value2;
+    WHERE column_name NOT BETWEEN value1 AND value2;
+    ```
+    value1과 value2를 포함한, 사이 범위(<=,>=)의 값들을 선택함.  
+
+  - IN 연산자  
+    ```
+    WHERE column_name IN ('조건1', '조건2', ... '조건N') 
+    ```
+    OR 연산자와 같은 기능을 함.  
+    조건들 중 하나라도 만족하는 값을 선택.  
+  - LIKE 연산자  
+    속성값이 특정 문자, 혹은 숫자인 값만 선택.  
+    ```
+    SELECT * FROM Customers
+    WHERE Country LIKE 'Spain';
+    // Country 속성 중, 'Spain'인 행만 출력
+    ```
+  
+  - 와일드카드  
+    와일드카드는 LIKE 연산자와 함께 쓰임  
+    https://www.w3schools.com/sql/sql_wildcards.asp  
+    와일드카드 문자 종류  
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>%</td>
+          <td>Represents zero or more characters 글자 수를 신경쓰지 않음</td>
+        </tr>
+        <tr>
+          <td>_</td>
+          <td>Represents a single character 한 글자만 올 수 있음</td>
+        </tr>
+        <tr>
+          <td>[]</td>
+          <td>Represents any single character within the brackets *</td>
+        </tr>
+        <tr>
+          <td>^</td>
+          <td>Represents any character not in the brackets *</td>
+        </tr>
+        <tr>
+          <td>-</td>
+          <td>Represents any single character within the specified range *</td>
+        </tr>
+        <tr>
+          <td>{}</td>
+          <td>Represents any escaped character **</td>
+        </tr>
+      </tbody>
+    </table>
+
+    *: PostgreSQL, MySQL에선 지원하지 않는 기능.  
+    **: Oracle DB에서만 지원하는 기능.  
+
+    Microsoft Access DB도 지원하지만, 사용하는 문자가 다름.  
+    ```
+    -- ENAME 중 S로 끝나는 값 출력
+    SELECT *
+    FROM EMP
+    WHERE ENAME LIKE '%S';
+
+    -- ENAME 중 두 번째 글자가 L인 값 출력
+    SELECT *
+    FROM EMP
+    WHERE ENAME LIKE '_L%';
+
+    -- ENAME 중 AM이라는 글자가 포함되면 모두 출력
+    SELECT *
+    FROM EMP
+    WHERE ENAME LIKE '%AM%';
+    ```
+
+  - ESCAPE 절  
+  데이터 명에 와일드카드 기호로 사용되는 _나 %가 들어갈 경우,    
+  데이터의 이름을 와일드카드 기호로 인식하지 않도록 하기 위해 사용함.  
+    ```
+    SELECT * FROM SOME_TABLE
+    WHERE SOME_COLUMN LIKE 'A\_A%' ESCAPE '\';
+    -- \ 바로 뒤에 있는 _를 와일다 카드 기호가 아닌 데이터에 포함된 문자로 인식하라는 의미 --
+    ```
+
+  - IS NULL 연산자  
+  값이 NULL인 경우 선택함.  
+    ```
+    -- WHERE COMM = NULL; 불가능 (NULL은 연산이 불가능함.)
+    WHERE COMM IS NULL;
+    -- COMM 속성 중 값이 NULL인 칼럼들을 선택.
+    ```
+    ![alt text](../../image/nullAndOr.PNG)  
+
+  - 집합연산자  
+    - UNION(합집합, 중복X)
+    두 개 이상 SELECT를 하는 경우, UNION을 넣으면 모두 선택함.  
+    단, 컬럼의 개수와 자료형이 같아야 함.  
+    ```
+    SELECT * FROM EMP WHERE DEPTNO = 10
+    UNION
+    SELECT * FROM EMP WHERE DEPTNO = 20
+    -- DEPTNO가 10인 칼럼과 20인 칼럼을 모두 선택
+    ```
+    - UNION ALL(합집합, 중복O)  
+    중복된 결과 값까지 모두 출력함.  
+    - MINUS(차집합)  
+    먼저 작성한 SELECT문의 결과값에서, 다음 SELECT 문의 결과값을 차집합한 값들을 선택힘.  
+    즉, 먼저 작성한 SELECT문의 결과값 중에서, 다음 SELECT문에 존재하지 않는 데이터만 선택됨.  
+    - INTERSECT(교집합)  
+    먼저 작성한 SELECT문과 다음 SELECT문의 결과값 중, 둘 다 있는 데이터만 선택됨.  
+    AND와 같은 기능을 함.  
+
+  - ### 함수  
+  내장 함수와 사용자 정의 함수로 나뉨.  
+
+  #### 내장 함수  
+  입력 방식에 따라 데이터 처리에 사용하는 행이 나뉨.  
+  단일행 함수(Single-row function) : 데이터가 한 행씩 입력되고, 입력된 한 행당 결과가 하나씩 나오는 함수.  
+  다중행 함수(Multiple-row function) : 데이터가 여러 행 입력되어, 항상 하나의 행으로 결과가 반환되는 함수.  
+  
+  `UPPER(문자열)` : 괄호 안 문자 데이터를 모두 대문자로 변환하여 반환  
+  `LOWER(문자열)` : 괄호 안 문자 데이터를 모두 소문자로 변환하여 반환  
+  `INITCAP(문자열)` : 괄호 안 문자 데이터 중 첫 글자는 대문자로, 나머지 문자는 소문자로 변환하여 반환  
+  ![alt text](../../image/UpperLowerInitcap.PNG)  
+  `LENGTH(문자열)` : 괄호 안 데이터의 길이를 반환  
+  `LENGTHB(문자열)` : 길이를 byte수로 반환. (문자 하나당 2byte)  
+  `SUBSTR()` : 괄호 안 문자열 데이터에서 지정한 위치, 길이만큼 잘라서 반환  
+  단, index는 1부터 시작. 길이를 지정하지 않으면 끝까지.  
+  ![alt text](../../image/oracleSubstr.png)  
+  ![alt text](../../image/oracleSubstr2.png)  
+  `INSTR()` : 괄호 안 문자 데이터 중에서 지정한 데이터를 찾아, 해당 위치를 반환 (없으면 0을 반환)  
+  INSTR(문자열, 찾을문자, 시작위치, n번째)  
+    ```
+      SELECT 'HELLO, ORACLE!' AS STR,
+            -- 앞에서부터 검색한 L 위치
+            INSTR('HELLO, ORACLE!', 'L') AS INSTR_1,
+            -- 5번째 글자부터 검색한 L 위치
+            INSTR('HELLO, ORACLE!', 'L', 5) AS INSTR_2,
+            -- 2번째 글자부터 검색한 2번째 L 위치
+            INSTR('HELLO, ORACLE!', 'L', 2, 2) AS INSTR_3
+      FROM DUAL;
+    ```
