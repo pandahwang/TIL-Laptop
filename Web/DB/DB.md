@@ -323,6 +323,7 @@ ORDER BY 절은 꼭 필요한 경우가 아니면 사용하지 않는 것이 좋
 - #### WHERE 절  
 IF문 조건과 유사함.  
 특정 조건을 기준으로, 원하는 행을 선택할 때 사용함.  
+조건을 만족하는 column만 선택함.  
 
 SELECT ~ FROM이 먼저 수행되어 정보를 가져오고, 그 후에 WHERE로 필터링하여 선택함.  
 (한 행마다 조건을 판별함)  
@@ -471,25 +472,289 @@ WHERE 조건의 개수 제한은 없음.
   단일행 함수(Single-row function) : 데이터가 한 행씩 입력되고, 입력된 한 행당 결과가 하나씩 나오는 함수.  
   다중행 함수(Multiple-row function) : 데이터가 여러 행 입력되어, 항상 하나의 행으로 결과가 반환되는 함수.  
   
-  `UPPER(문자열)` : 괄호 안 문자 데이터를 모두 대문자로 변환하여 반환  
-  `LOWER(문자열)` : 괄호 안 문자 데이터를 모두 소문자로 변환하여 반환  
-  `INITCAP(문자열)` : 괄호 안 문자 데이터 중 첫 글자는 대문자로, 나머지 문자는 소문자로 변환하여 반환  
+---
+
+  - `UPPER(문자열)` : 괄호 안 문자 데이터를 모두 대문자로 변환하여 반환  
+  - `LOWER(문자열)` : 괄호 안 문자 데이터를 모두 소문자로 변환하여 반환  
+  - `INITCAP(문자열)` : 괄호 안 문자 데이터 중 첫 글자는 대문자로, 나머지 문자는 소문자로 변환하여 반환  
   ![alt text](../../image/UpperLowerInitcap.PNG)  
-  `LENGTH(문자열)` : 괄호 안 데이터의 길이를 반환  
-  `LENGTHB(문자열)` : 길이를 byte수로 반환. (문자 하나당 2byte)  
-  `SUBSTR()` : 괄호 안 문자열 데이터에서 지정한 위치, 길이만큼 잘라서 반환  
-  단, index는 1부터 시작. 길이를 지정하지 않으면 끝까지.  
-  ![alt text](../../image/oracleSubstr.png)  
-  ![alt text](../../image/oracleSubstr2.png)  
-  `INSTR()` : 괄호 안 문자 데이터 중에서 지정한 데이터를 찾아, 해당 위치를 반환 (없으면 0을 반환)  
-  INSTR(문자열, 찾을문자, 시작위치, n번째)  
+  - `LENGTH(문자열)` : 괄호 안 데이터의 길이를 반환  
+  - `LENGTHB(문자열)` : 길이를 byte수로 반환. (문자 하나당 2byte)  
+  - `SUBSTR()` : 괄호 안 문자열 데이터에서 지정한 위치, 길이만큼 잘라서 반환  
+    단, index는 1부터 시작. 길이를 지정하지 않으면 끝까지.  
+    ![alt text](../../image/oracleSubstr.png)  
+    ![alt text](../../image/oracleSubstr2.png)  
+  - `INSTR()` : 괄호 안 문자 데이터 중에서 지정한 데이터를 찾아, 해당 위치를 반환 (없으면 0을 반환)  
+    INSTR(문자열, 찾을문자, 시작위치, n번째)  
+      ```
+        SELECT 'HELLO, ORACLE!' AS STR,
+              -- 앞에서부터 검색한 L 위치
+              INSTR('HELLO, ORACLE!', 'L') AS INSTR_1,
+              -- 5번째 글자부터 검색한 L 위치
+              INSTR('HELLO, ORACLE!', 'L', 5) AS INSTR_2,
+              -- 2번째 글자부터 검색한 2번째 L 위치
+              INSTR('HELLO, ORACLE!', 'L', 2, 2) AS INSTR_3
+        FROM DUAL;
+      ```
+      
+      INSTR을 사용해서, ENAME 중 S가 포함된 column을 출력하는 예시  
+      ```
+      SELECT * FROM EMP
+      WHERE INSTR(ename,'S') > 0;
+      ```
+
+  - `REPLACE()` : 괄호 안 문자 데이터 중, 특정 값을 지정한 값으로 바꿈.  
     ```
-      SELECT 'HELLO, ORACLE!' AS STR,
-            -- 앞에서부터 검색한 L 위치
-            INSTR('HELLO, ORACLE!', 'L') AS INSTR_1,
-            -- 5번째 글자부터 검색한 L 위치
-            INSTR('HELLO, ORACLE!', 'L', 5) AS INSTR_2,
-            -- 2번째 글자부터 검색한 2번째 L 위치
-            INSTR('HELLO, ORACLE!', 'L', 2, 2) AS INSTR_3
-      FROM DUAL;
+    SELECT '010-1234-5678' AS 원본문자열,
+      REPLACE('010-1234-5678','-',' ') AS 하이픈을공백으로,
+      REPLACE('010-1234-5678', '-') AS 하이픈만제거
+    FROM DUAL;
     ```
+  - `LPAD()`,`RPAD()` : 문자열과 길이를 지정하고, 빈 공간을 원하는 값으로 채운 데이터를 반환.  
+    ```
+    LPAD('문자열',길이,'패딩문자(선택)')
+    RPAD('문자열',길이,'패딩문자(선택)')
+    패딩문자를 적지 않으면, 기본값인 공백이 들어감
+    ```
+    ![alt text](../../image/LRPAD.PNG)  
+
+  - `CONCAT()` : 두 문자열 데이터를 하나의 데이터로 연결함.  
+    ```
+    CONCAT(문자열1, 문자열2)
+    CONCAT(문자열1, CONCAT(문자열3), 문자열2)
+    두 문자열 사이에 문자열 3을 넣음
+    ```
+    || (AND) 연산자로 쓸 수도 있음.  
+    ```
+    SELECT EMPNO || ' : ' || ENAME
+    FROM EMP;
+    ```
+  - `TRIM()` : 문자열 내 공백을 없앤 데이터를 반환함.  
+    ```
+    TRIM('  문자열  ')
+    ```
+    키워드를 통해 공백을 <span style="text-decoration:underline">제거할 위치</span>와, 공백이 아닌 <span style="text-decoration:underline">제거할 문자</span>를 지정 할 수 있음.  
+
+    키워드를 통해 공백을 제거
+    ```
+    SELECT  '[' || TRIM(' _ _ORACLE_ _ ') || ']' AS TRIM,
+          -- 문자열 앞 공백 제거
+          '[' || TRIM(LEADING FROM ' _ _ORACLE_ _ ') || ']' AS TRIM_LEADING,
+          -- 문자열 뒤 공백 제거
+          '[' || TRIM(TRAILING FROM ' _ _ORACLE_ _') || ']' AS TRIM_TRAILING,
+          -- 문자열 양쪽 공백 제거(기본값)
+          '[' || TRIM(BOTH FROM ' _ _ORACLE_ _') || ']' AS TRIM_BOTH
+          FROM DUAL;
+    ```
+    키워드를 통해 지정한 문자를 제거
+    ```
+    SELECT  '[' || TRIM('_' FROM '_ _ORACLE_ _') || ']' AS TRIM,
+          '[' || TRIM(LEADING '_' FROM '_ _ORACLE_ _') || ']' AS TRIM_LEADING,
+          '[' || TRIM(TRAILING '_' FROM '_ _ORACLE_ _') || ']' AS TRIM_TRAILING,
+          '[' || TRIM(BOTH '_' FROM '_ _ORACLE_ _') || ']' AS TRIM_BOTH
+          FROM DUAL;
+    ```
+  - `LTRIM`, `RTRIM` : 왼쪽/오른쪽에 있는 공백들을 제거함.  
+    마찬가지로 키워드를 통해 제거할 문자를 지정할 수 있음.  
+    ```
+    LTRIM('  문자열  ')
+    --`문자열  `
+    RTRIM('  문자열  ')
+    --`  문자열`
+    ```
+    지정한 키워드가 여러 개인 경우, 적은 키워드들이 있는 부분은 모두 제거함.  
+     ```
+    LTRIM('<__ORACLE_>','_<')
+    --[ORACLE_>]
+     ```
+  - `ROUND` : 지정한 위치에서 <span style="text-decoration:underline">반올림</span>하는 함수  
+    ```
+    ROUND([숫자], [반올림위치(선택)])
+    -- 반올림 위치를 적지 않으면, 소수 첫째자리에서 반올림 함.
+    -- 음수를 적으면 정수 자리에서 반올림.  
+    ```
+    예시
+    ```
+        SELECT  ROUND(1234.5678),
+            ROUND(1234.5678,0),
+            ROUND(1234.5678,1),
+            ROUND(1234.5678,2),
+            ROUND(1234.5678,-1),
+            ROUND(1234.5678,-2)
+        FROM DUAL;
+
+    ```
+  - `TRUNC` : 지정된 위치에서 <span style="text-decoration:underline">버림</span>하는 함수
+     ```
+      SELECT
+      TRUNC([숫자], [버림위치(선택)])
+      -- 위치를 적지 않으면, 소수 첫째자리에서 버림.
+      -- 음수를 적으면 정수 자리에서 버림.  
+      ```
+  - `CEIL`, `FLOOR` : 각각 입력된 숫자와 가장 가까운, 앞에 있는(큰) / 뒤에 있는(작은) 숫자를 반환함.  
+    ```
+    SELECT
+      -- 4
+      CEIL(3.14),
+      -- 3
+      FLOOR(3.14),
+      -- -3
+      CEIL(-3.14),
+      -- -4
+      FLOOR(-3.14)
+    ```
+  - `MOD` : (%) 나머지 값을 구하는 함수.  
+    홀수, 짝수를 구분할 때 사용함.  
+    ```
+    MOD([숫자], [숫자])
+    ``` 
+
+---
+
+  #### DATE 날짜 함수  
+  날짜 데이터 + 숫자 : 숫자만큼 일수 이후의 날짜  
+  날짜 데이터 - 숫자 : 숫자만큼 일수 이전의 날짜  
+  날짜 데이터 - 날짜 데이터 : 두 날짜 데이터 간의 일수 차이  
+  날짜 데이터 + 날짜 데이터 : 연산 불가. 지원x.  
+
+  - `SYSDATE` : 시스템 날짜를 반환.  
+  - `ADD_MONTHS()` : 날짜 데이터에 달을 더함.  
+    ```
+    ADD_MONTHS(날짜, 더할 달)
+    ```
+  - `MONTHS_BETWEEN()` : 두 날짜간의 달수 차이를 반환함.  
+    ```
+    SELECT EMPNO, ENAME, HIREDATE, SYSDATE, TRUNC(MONTHS_BETWEEN(HIREDATE, SYSDATE)) AS MONTH1,
+        TRUNC(MONTHS_BETWEEN(SYSDATE, HIREDATE)) AS MONTH2
+    FROM EMP;
+
+    ```
+    ![alt text](../../image/MONTH_BETWEEN.PNG)  
+  
+  - `NEXT_DAY` : 입력한 날짜 기준으로 돌아오는 요일 날짜를 반환함.  
+    ```
+    NEXT_DAY(날짜, '요일')
+    NEXT_DAY(SYSDATE, '월요일')
+    ```
+  - `LAST_DAY` : 입력한 날짜 기준 달의 마지막 날짜를 반환함.  
+    ```
+    LAST_DAY(날짜)
+    LAST_DAY(SYSDATE)
+    ```
+  - `ROUND`, `TRUNC` : 날짜 데이터에서 사용하는 ROUND, TRUNC 함수는 매개변수가 다름.  
+    ```
+    ROUND([DATE], [FORMAT])
+    ```
+    ![alt text](../../image/DataRoundTruncFormat.PNG)  
+
+---
+
+  #### 데이터 형변환 함수  
+    ![alt text](../../image/SQL_Type_Conversion.PNG)  
+
+  - `TO_CHAR` : 숫자 또는 날짜 데이터를 문자 데이터로 변환  
+    날짜 데이터를 분자 데이터로 변환할 때, 형식과 언어를 지정할 수 있음.  
+    language_types : https://ss64.com/ora/syntax-nls.html  
+    ```
+    SELECT TO_CHAR(DATEDATA, 'FORMAT', (선택)'NLS_DATE_LANGUAGE = language_type')
+    SELECT TO_CHAR(SYSDATE, 'YYYY/MM/DD HH24:MI:SS') FROM DUAL;
+    ```
+    날짜, 시간 포맷(DATE, TIME FORMAT)  
+    ![alt text](../../image/DATECHARFORMAT.png)  
+    연도를 두 자리수로 표기할 때, YY는 무조건 2000년대, RR은 50년도 이전은 2000년대, 50년도 이후는 19년대로 표시.  
+    ![alt text](../../image/DATECHARFORMAT_2.png)  
+    숫자 포맷(NUMBER FORMAT)  
+    ```
+    SELECT  TO_CHAR(SAL, '$999,999') AS SAL_$,
+            TO_CHAR(SAL, 'L999,999') AS SAL_L,
+            TO_CHAR(SAL, '999,999.00') AS SAL_1,
+            TO_CHAR(SAL, '000,999,999.00') AS SAL_2,
+            TO_CHAR(SAL, '000999999.99') AS SAL_3,
+            TO_CHAR(SAL, '999,999,00') AS SAL_4
+    FROM EMP;
+    ```
+  - `TO_NUMBER` : 문자 데이터를 숫자 데이터로 변환  
+    숫자로 이루어진 문자 데이터만 연산한데, 이 때 문자가 포함된 데이터를 숫자 데이터로 변환하고 싶을 때 사용함.  
+    ```
+    TO_NUMBER(문자열,'NUMBER_FORMAT')
+    -- 해당 문자열을 어떻게 읽을지 포맷을 알려줌
+    ```
+  - `TO_DATE` : 문자 데이터를 날짜 데이터로 변환  
+    ```
+    TO_DATE(`문자열`, `DATE_FORMAT`)
+    -- 문자열과 형식 길이가 같아야 함.
+    ```
+
+---
+
+  #### NULL 처리 함수  
+  - `NVL()` : 입력한 칼럼의 값 중 NULL이 있으면, 지정한 값으로 바꾸는 함수  
+  ```
+  NVL(column_name, NULL_to_int/boolean/String)
+  NVL([NULL여부를 검사할 데이터 OR 열], [NULL일 경우 반환할 데이터])
+  ```
+
+  - `NVL2()` : NULL이 아닌 경우도 값 지정 가능.  
+  ```
+  NVL2(NULL_col, NULL_to, NOT_NULL_to)
+  NVL2([NULL여부를 검사할 데이터 OR 열], [NULL이 아닐 경우 반환할 데이터], [NULL일 경우 반환할 데이터])
+  ```
+
+---
+
+  #### 조건문 함수  
+  특정 조건에 따라 반환할 데이터를 설정할 때 사용함.  
+  <span style="text-decoration:underline">조건에 따라 반환할 타입이 모두 같아야 함.</span>  
+  - `DECODE()` : SWITCH문과 비슷함.  
+    ```
+    DECODE([검사 대상],
+            [조건1], [조건1일때 결과],
+            [조건2], [조건2일때 결과],
+            ...
+            [조건n], [조건n일때 결과],
+            (선택)[일치한 조건이 없을 때 결과])
+    -- default 조건이 없는 경우, NULL로 반환됨.
+    ```
+    ```
+    -- 예시
+    SELECT EMPNO, ENAME, JOB, SAL,
+        DECODE(JOB, 
+        'MANAGER', SAL*1.1, 
+        'SALESMAN', SAL*1.05, 
+        'ANALYST', SAL, 
+        SAL*1.03) AS UPSAL
+    FROM EMP;
+    ```
+
+  - `CASE()` : IF문과 비슷함.  
+    ```
+    CASE [검사 대상],
+      WHEN [조건1] THEN [조건1이 TRUE일 때 결과]
+      WHEN [조건2] THEN [조건2이 TRUE일 때 결과]
+      ...
+      WHEN [조건n] THEN [조건 n이 TRUE일 때 결과]
+      ELSE [일치하는 조건이 없을 때 결과]
+    END
+    ```
+    JOB 별로 SAL값을 다르게 출력하는 예시
+    ```
+    SELECT EMPNO, ENAME, JOB, SAL,
+        CASE JOB
+            WHEN 'MANAGER' THEN SAL*1.1
+            WHEN 'SALESMAN' THEN SAL*1.05
+            WHEN 'ANALYST' THEN SAL
+            ELSE SAL*1.03
+        END
+            AS UPSAL
+    FROM EMP;
+    ```
+    COMM 값을 참조해서 추가수당 별로 다르게 출력하는 예시  
+      ```
+      SELECT EMPNO, ENAME, JOB, SAL, 
+      CASE
+          WHEN COMM=0 THEN '수당없음'
+          WHEN COMM>0 THEN '수당:' || COMM
+          ELSE '해당사항 없음'
+      END
+      FROM EMP;
+      ```
