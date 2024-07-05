@@ -261,7 +261,7 @@ ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.
     ![alt text](../../image/scottdb_salgrade.png)  
     table 구성 요소는 대문자로 적는 것을 권장.  
 
-## 데이터 조회  
+## 문법  
 
 ### SELECT문  
 데이터를 선택하는 명령어.  
@@ -473,6 +473,7 @@ WHERE 조건의 개수 제한은 없음.
   다중행 함수(Multiple-row function) : 데이터가 여러 행 입력되어, 항상 하나의 행으로 결과가 반환되는 함수.  
   
 ---
+  #### 단일행 함수
 
   - `UPPER(문자열)` : 괄호 안 문자 데이터를 모두 대문자로 변환하여 반환  
   - `LOWER(문자열)` : 괄호 안 문자 데이터를 모두 소문자로 변환하여 반환  
@@ -706,7 +707,7 @@ WHERE 조건의 개수 제한은 없음.
   특정 조건에 따라 반환할 데이터를 설정할 때 사용함.  
   <span style="text-decoration:underline">조건에 따라 반환할 타입이 모두 같아야 함.</span>  
   - `DECODE()` : SWITCH문과 비슷함.  
-    ```
+    ```SQL
     DECODE([검사 대상],
             [조건1], [조건1일때 결과],
             [조건2], [조건2일때 결과],
@@ -715,7 +716,7 @@ WHERE 조건의 개수 제한은 없음.
             (선택)[일치한 조건이 없을 때 결과])
     -- default 조건이 없는 경우, NULL로 반환됨.
     ```
-    ```
+    ```SQL
     -- 예시
     SELECT EMPNO, ENAME, JOB, SAL,
         DECODE(JOB, 
@@ -727,7 +728,7 @@ WHERE 조건의 개수 제한은 없음.
     ```
 
   - `CASE()` : IF문과 비슷함.  
-    ```
+    ```SQL
     CASE [검사 대상],
       WHEN [조건1] THEN [조건1이 TRUE일 때 결과]
       WHEN [조건2] THEN [조건2이 TRUE일 때 결과]
@@ -737,7 +738,7 @@ WHERE 조건의 개수 제한은 없음.
     END
     ```
     JOB 별로 SAL값을 다르게 출력하는 예시
-    ```
+    ```SQL
     SELECT EMPNO, ENAME, JOB, SAL,
         CASE JOB
             WHEN 'MANAGER' THEN SAL*1.1
@@ -749,7 +750,7 @@ WHERE 조건의 개수 제한은 없음.
     FROM EMP;
     ```
     COMM 값을 참조해서 추가수당 별로 다르게 출력하는 예시  
-      ```
+      ```SQL
       SELECT EMPNO, ENAME, JOB, SAL, 
       CASE
           WHEN COMM=0 THEN '수당없음'
@@ -758,3 +759,233 @@ WHERE 조건의 개수 제한은 없음.
       END
       FROM EMP;
       ```
+---
+
+  #### 다중행 함수  
+  결과값이 한 행이기 때문에, 다중행과 함께 출력할 수 없음.  
+  - `SUM()` : 지정한 데이터의 합을 반환  
+  NULL처리를 따로 해주지 않아도 됨.  
+  ```SQL
+  SELECT SUM(col_name)
+  FROM table_name
+  ```
+  ```SQL
+  SUM([DISTINCT, ALL(선택)] [col_name])
+  OVER(분석을 위한 여러 문법을 지정)(선택)
+  ```
+  - `COUNT()` : 지정한 데이터의 개수 반환  
+  NULL은 세지 않음.  
+    ```SQL
+    COUNT([DISTINCT, ALL(선택)] [col_name])
+    OVER(분석을 위한 여러 문법을 지정)(선택)
+    ```
+  - `MAX()` : 지정한 데이터 중 최댓값 반환  
+  - `MIN()` : 지정한 데이터 중 최솟값 반환  
+  문자열, 숫자, 날짜 모두 가능.  
+  - `AVG()` : 지정한 데이터의 평균값 반환  
+
+- `GROUP BY` 절 : 다중행 함수와 같이 자주 쓰임  
+함수 결과 값을 행별로 나누고 싶을 때, 즉 다중행과 함께 나란히 출력하고 싶을 때  
+해당 다중행을 기준으로 함수 결과행을 GROUP BY로 묶어줌.  
+```SQL
+SELECT [col_name1], [col_name2], ...
+FROM [table_name]
+WHERE [조건]
+GROUP BY [그룹화할 열(여러개 가능)]
+ORDER BY [정렬하려는 열]
+```
+```SQL
+SELECT AVG(SAL), '10' AS DEPTNO FROM EMP WHERE DEPTNO = 10
+UNION
+SELECT AVG(SAL), '10' AS DEPTNO FROM EMP WHERE DEPTNO = 20
+UNION
+SELECT AVG(SAL), '10' AS DEPTNO FROM EMP WHERE DEPTNO = 30;
+--↓
+SELECT AVG(SAL), DEPTNO FROM EMP GROUP BY DEPTNO;
+```
+- `HAVING`절  
+묶인 컬럼의 조건을 정의할 때 사용.  
+GROUP BY절을 사용할 때, 조건을 넣기 위해 사용함.  
+```SQL
+-- 부서별, 직급별 평균 급여가 2000이상인 데이터를 출력
+SELECT DEPTNO, JOB, AVG(SAL) FROM EMP
+GROUP BY DEPTNO, JOB
+    HAVING AVG(SAL)>=2000
+ORDER BY DEPTNO ,JOB;
+```
+```SQL
+-- 수행 순서
+SELECT ② 
+FROM  ①
+WHERE ③
+GROUP BY ④ 
+HAVING 
+```
+- `ROLLUP`, `CUBE`, `GROUPING SETS` 함수  
+GROUP BY 절에 지정할 수 있는 특수 함수.  
+그룹화 데이터의 합게를 출력할 때 사용.  
+  - `ROLLUP` : GROUP BY는 소그룹에 대한 결과만 출력하지만, ROLLUP함수를 사용하면 대그룹과 총그룹에 대한 결과도 출력.  
+  포함관계를 기준으로 작은 그룹부터 큰 그룹까지 출력함.  
+  ![alt text](../../image/SQL_ROLLUP.png)  
+  - `CUBE` : ROLLUP보다 더 많은 결과를 출력.  
+  포함관계를 무시하고, 모든 열의 조합으로 출력함.  
+
+  그룹화 => 가장 소그룹의 결과  
+  ROLLUP => 소그룹->대그룹의 결과  
+  CUBE => 조합 가능한 모든 그룹 결과  
+
+  ![alt text](../../image/SQL_CUBE.PNG)  
+  - `GROUPING SETS` : 계층없이, 지정한 그룹들의 결과만 출력함.  
+```SQL
+-- ROLLUP : 대그룹, 총그룹에 대한 결과를 출력
+GROUP BY ROLLUP([col_name(대그룹)], [col_name(소그룹)])
+-- CUBE : 모든 열의 조합 결과 출력
+GROUP BY CUBE([col_name(대그룹)], [col_name(소그룹)])
+-- GROUPING SETS
+GROUP BY GROUPING SETS([col_name], [col_name])
+```
+
+  - `GROUPING` 함수 :  
+  그룹화가 되었는지, 몇개의 그룹이 그룹화 되었는지 출력.  
+  그룹화가 되었으면 0, 묶이지 않았으면 1  
+  조건문에 사용하기 유용함.  
+  ```
+  SELECT 
+  DECODE(GROUPING(DEPTNO), 1, 'ALL_DEPT', DEPTNO) AS DEPTNO,
+  DECODE(GROUPING(JOB),1,'ALL_JOB', JOB) AS JOB,
+  COUNT(*), MAX(SAL), SUM(SAL), AVG(SAL), GROUPING(DEPTNO), GROUPING(JOB)
+  FROM EMP
+  GROUP BY CUBE(DEPTNO, JOB)
+  ORDER BY DEPTNO, JOB;
+  ```
+
+  - `GROUPING_ID` 함수 :  
+  GROUPING은, 한 컬럼에 대한 그룹화 유무를 보여주지만, GROUPING_ID는 지정한 모든 컬럼에 대한 그룹화 유무를 보여줌.  
+  ![alt text](../../image/SQL_GROUPING_ID.png)  
+  ```
+  SELECT 
+  DEPTNO,JOB,COUNT(*), MAX(SAL), SUM(SAL), AVG(SAL), GROUPING(DEPTNO), GROUPING(JOB), GROUPING_ID(DEPTNO, JOB)
+  FROM EMP
+  GROUP BY CUBE(DEPTNO, JOB)
+  ORDER BY DEPTNO, JOB;
+  ```
+  - `LISTAGG` 함수 :  
+  데이터를 가로로 출력할 수 있음. `WITHIN`과 함께 쓰임  
+  ```
+  SELECT DEPTNO, 
+        LISTAGG(ENAME, ', ')
+        WITHIN GROUP(ORDER BY SAL DESC) AS ENAMES
+      FROM EMP
+  GROUP BY DEPTNO;
+  ```
+  - `PIVOT` 함수 :  
+
+  ```
+  SELECT *
+  FROM (SELECT DEPTNO, JOB, SAL FROM EMP)
+  PIVOT(MAX(SAL) FOR DEPTNO IN (10,20,30))
+  ORDER BY JOB;
+  ```
+
+  ### JOIN  
+  두 개 이상의 테이블을 연결하여, 하나의 테이블처럼 출력할 때 사용함.  
+  어떻게 연결하느냐에 따라 종류가 나뉨.  
+  - EQUAL-JOIN(등가 조인) : 일반적으로 가장 많이 사용되는 JOIN 방식.  
+  WHERE 절로 조건을 주어서, 데이터값이 같은(=) 행만 합침.  
+  행 이름이 같을 때는, `TABLE.COLNAME`로 구분함.  
+  AND로 조건 추가 가능.  
+  ```
+  SELECT EMP.EMPNO, EMP.ENAME, EMP.DEPTNO, DEPT.DNAME, DEPT.loc
+  WHERE EMP.DEPTNO = DEPT.DEPTNO
+  ORDER BY EMPNO;
+  -- ALIAS 사용 ↓
+  SELECT E.EMPNO, E.ENAME, E.DEPTNO, D.DNAME, D.loc
+  FROM EMP E, DEPT D
+  WHERE e.DEPTNO = d.DEPTNO;
+  ```
+  - NON-EQUAL-JOIN(비등가조인) : 등가 조인을 제외한 모든 조인 방법  
+    - CROSS-JOIN : 모든 행을 조합함. (col * col)
+    ```
+    SELECT
+    FROM TABLE1, TABLE2, TABLE...;
+    ```
+    - 포괄조인  
+    ```
+    SELECT * 
+    FROM EMP E, SALGRADE S
+    WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL;
+    ```
+    - INNER-JOIN(자체조인) : 자신의 테이블 내에서 행을 참조하여 조인하는 방법  
+    원본 테이블을 가져와 새로운 테이블을 만들고, 거기에 행을 조인하는 방법이 있지만,  
+    데이터 용량이 거의 두 배가 되어 효율이 떨어짐.  
+    이를 대신하는 방법이 자체 조인임.  
+    매칭이 되는 데이터만 출력함.  
+    ```
+    SELECT E1.EMPNO, E1.ENAME, E1.MGR, E2.EMPNO AS 상사사번, E2.ENAME AS 상사이름
+    FROM EMP E1, EMP E2
+    WHERE E1.MGR = E2.EMPNO;
+    ```
+    FROM으로 자기 자신을 참조하면서, 별칭을 붙이면 됨.  
+    - OUTER-JOIN(외부조인) : 매칭이 안 되는 데이터(비어있는 데이터)도 조인함.  
+      <span style="text-decoration:underline">(JAVA 스레드처럼, 면접 질문으로 빈번히 나옴.)</span>  
+      - LEFT-OUTER-JOIN : 왼쪽에 있는 데이터만 출력함.  
+      - RIGHT-OUTER-JOIN : 오른쪽에 있는 데이터만 출력함.  
+      왼쪽, 오른쪽 중 출력하고 싶은 곳에`(+)`를 적으면 됨.  
+    ```
+    SELECT E1.EMPNO, E1.ENAME, E1.MGR, E2.EMPNO AS 상사사번, E2.ENAME AS 상사이름
+    FROM EMP E1, EMP E2
+    WHERE E1.MGR = E2.EMPNO(+);
+    ```
+    ![alt text](../../image/SQL_JOIN.png)  
+
+# SQL-99 표준 문법  
+ISO/ANSI에서 지정한 표준 문법. (ANSI 문법이라고도 부름)  
+### JOIN 문법
+- NATURAL JOIN (등가조인)  
+WHERE 절을 사용하지 않고, FROM 절에서 조건을 적음.  
+COLUMN명 앞에 TABLE명도 적지 않음.
+```
+SELECT EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, DNAME, LOC
+FROM EMP NATURAL JOIN DEPT;
+```
+- JOIN USING  
+WHERE 절을 따로 적어 조건을 줄 수 있음.  
+```
+SELECT EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, DNAME, LOC
+FROM EMP JOIN DEPT USING (DEPTNO)
+WHERE SAL >= 3000;
+```
+- JOIN ON  
+COLUMN명 앞에 TABLE명을 적을 수 있음.  
+```
+SELECT E.EMPNO, E.ENAME, E.JOB, E.MGR, E.HIREDATE, E.SAL, E.COMM, E.DEPTNO, D.DNAME, D.LOC
+FROM EMP E JOIN DEPT D ON (E.DEPTNO = D.DEPTNO);
+```
+
+- OUTER JOIN  
+WHERE절이 아닌 FROM절에서 외부조인을 선언.  
+![alt text](../../image/ANSI_OUTER_JOIN.PNG)  
+  
+```
+SELECT E1.EMPNO, E1.ENAME, E1.MGR, E2.EMPNO, E2.ENAME
+FROM EMP E1, EMP E2
+WHERE E1.MGR = E2.EMPNO(+);
+-- ▽
+SELECT E1.EMPNO, E1.ENAME, E1.MGR, E2.EMPNO, E2.ENAME
+FROM EMP E1 LEFT OUTER JOIN EMP E2 ON (E1.MGR = E2.EMPNO);
+```
+모두 출력하고 싶은 데이터에 (+)를 적는 대신, LEFT/RIGHT/BOTH를 적어 표시하고,  
+ON에 조건을 적음.  
+
+#### 세 개 이상의 TABLE JOIN  
+
+```SQL
+-- ORACLE
+FROM TABLE1, TABLE2, TABLE3
+WHERE TABLE1.COL = TABLE2.COL
+AND TABLE2.COL = TABLE3.COL
+-- ANSI ↓
+FROM TABLE1 JOIN TABLE2 ON (조건식) 
+JOIN TABLE3 ON(조건식)
+```
+![alt text](../../image/ANSI_MULTI_TABLE_JOIN.PNG)  
