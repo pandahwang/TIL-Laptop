@@ -263,6 +263,8 @@ ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.
 
 ## 문법  
 
+## 데이터 제어 명령어(DML)  
+
 ### SELECT문  
 데이터를 선택하는 명령어.  
 
@@ -943,20 +945,21 @@ ISO/ANSI에서 지정한 표준 문법. (ANSI 문법이라고도 부름)
 ### JOIN 문법
 - NATURAL JOIN (등가조인)  
 WHERE 절을 사용하지 않고, FROM 절에서 조건을 적음.  
-COLUMN명 앞에 TABLE명도 적지 않음.
+<span style="text-decoration:underline">COLUMN명 앞에 TABLE명도 적지 않음.</span>  
 ```
 SELECT EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, DNAME, LOC
 FROM EMP NATURAL JOIN DEPT;
 ```
 - JOIN USING  
 WHERE 절을 따로 적어 조건을 줄 수 있음.  
+<span style="text-decoration:underline">COLUMN명 앞에 TABLE명도 적지 않음.</span>  
 ```
 SELECT EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, DNAME, LOC
 FROM EMP JOIN DEPT USING (DEPTNO)
 WHERE SAL >= 3000;
 ```
 - JOIN ON  
-COLUMN명 앞에 TABLE명을 적을 수 있음.  
+<span style="text-decoration:underline">COLUMN명 앞에 TABLE명을 적을 수 있음.</span>  
 ```
 SELECT E.EMPNO, E.ENAME, E.JOB, E.MGR, E.HIREDATE, E.SAL, E.COMM, E.DEPTNO, D.DNAME, D.LOC
 FROM EMP E JOIN DEPT D ON (E.DEPTNO = D.DEPTNO);
@@ -989,3 +992,256 @@ FROM TABLE1 JOIN TABLE2 ON (조건식)
 JOIN TABLE3 ON(조건식)
 ```
 ![alt text](../../image/ANSI_MULTI_TABLE_JOIN.PNG)  
+
+## SUBQUERY 서브쿼리 
+내부에서 사용하는 SELECT문  
+데이터를 추가로 조회하기 위해 사용함.  
+
+- 서브쿼리 특징 :  
+  - 서브쿼리는 연산자와 같은 비교 또는 조회 대상의 오른쪽에 놓이며, 괄호()로 묶어서 사용함.  
+
+  - 특수한 경우를 제외하고, 대부분의 서브쿼리는 ORDER BY 절을 사용할 수 없음.  
+
+  - 서브쿼리의 SELECT절에 명시한 열은 메인쿼리의 비교대상과 같은 자료형, 같은 개수로 지정해야 함.  
+  즉, 메인쿼리의 비교 대상 데이터가 하나라면, 서브쿼리의 SELECT절 역시 같은 자료형인 열을 하나 지정해야 함.  
+
+  - 서브쿼리에 있는 SELECT문의 결과 행 수는, 함께 사용하는 메인쿼리의 연산자 종류와 호환 가능해야 함.  
+  예를 들어 메인쿼리에 사용한 연산자가 단 하나의 데이터로만 연산이 가능한 연산자라면(>,<등),  
+  서브쿼리의 결과 행 수는 반드시 하나여야 함.  
+
+```SQL
+SELECT SAL
+FROM EMP
+WHERE ENAME = 'JONES';
+
+SELECT * FROM EMP
+-- 만약, JONES라는 데이터가 여러개라면, >를 사용할 수 없음.
+-- 대신, IN 키워드를 사용할 수 있음.
+WHERE SAL > 2975;
+-- ▽
+SELECT *
+FROM EMP
+-- 같은 자료형인 SAL이 아니라, 다른 자료형을 지정하면 비교 불가능.
+WHERE SAL > (SELECT SAL FROM EMP WHERE ENAME='JONES');
+```
+
+### 단일행 서브쿼리  
+결과가 하나의 행인 서브쿼리  
+- 사용 가능 연산자 : >,<,>=,<=,=  
+단일행 함수를 사용할 수 있음.  
+
+```SQL
+...
+AND E.SAL > (SELECT AVG(SAL)FROM EMP);
+```
+
+### 다중행 서브쿼리  
+결과가 여러 행인 서브쿼리  
+- 사용 가능 연산자  
+  IN : 메인쿼리의 데이터가 서브쿼리의 결과 중 하나라도 일치한 데이터가 있다면 TRUE  
+  ANY, SOME : 메인쿼리의 조건식을 만족하는 서브쿼리의 결과가 하나 이상이면 TRUE  
+  ALL : 메인쿼리의 조건식을 서브쿼리의 결과 모두가 만족하면 TRUE  
+  EXISTS : 서브쿼리의 결과가 존재하면(즉, 행이 1개 이상일 경우) TRUE  
+
+```SQL
+-- 부서 번호 별, 급여가 가장 높은 값들 출력
+SELECT * FROM EMP
+WHERE SAL IN (SELECT MAX(SAL) FROM EMP GROUP BY DEPTNO);
+```
+
+```SQL
+-- 부서 번호가 10인 직원들보다 고용일이 빠른 모든 직원들을 출력
+SELECT * FROM EMP
+WHERE HIREDATE < ALL (SELECT HIREDATE FROM EMP WHERE DEPTNO=10 );
+```
+
+### 인라인 뷰  
+FROM절에서 사용하는 서브쿼리는, 인라인 뷰라고 불림.  
+
+```SQL
+-- 부서번호 10번에 존재하는 직원들의 직원정보와 부서정보를 FROM절 서브쿼리를 이용하여 출력
+SELECT E.EMPNO, E.ENAME, E.DEPTNO, D.DNAME, D.LOC
+FROM (SELECT * FROM EMP WHERE DEPNO = 10) E,
+    (SELECT * FROM DEPT) D
+WHERE E.DEPTNO = D.DEPTNO;
+--
+SELECT * 
+FROM(SELECT * FROM EMP WHERE DEPTNO = 10) NATURAL JOIN DEPT;
+```
+
+#### WITH절  
+테이블 내 데이터 규모가 너무 크거나, 현재 작업에 불필요한 열이 너무 많아 일부 행과 열만 사용하고자 할 때,  
+FROM절에서 너무 많은 서브쿼리를 지정하면 가독성, 성능이 떨어질 수 있기 때문에 WITH 절을 사용.  
+
+메인쿼리가 될 SELECT문 안에서 사용할, 서브쿼리와 별칭을 먼저 지정한 후  
+메인쿼리에서 사용함.  
+
+```SQL
+-- WITH절 기본 형식
+WITH
+[별칭1] AS (SELECT문 1),
+[별칭2] AS (SELECT문 2),
+...
+[별칭N] AS (SELECT문 N)
+SELECT
+  FROM 별칭1, 별칭2, 별칭3
+```
+
+```SQL
+WITH
+E AS (SELECT * FROM EMP WHERE DEPTNO = 10),
+D AS (SELECT * FROM DEPT)
+SELECT E.EMPNO, E.ENAME, E.DEPTNO, D.DNAME, D.LOC
+FROM E JOIN D ON (D.DEPTNO = E.DEPTNO);
+```
+
+### 상호 연관 서브쿼리  
+메인쿼리에 사용한 데이터를, 서브쿼리에 사용하고,  
+서브쿼리의 결과 값을 다시 메인쿼리로 돌려주는 방식.  
+
+조건에 따라 성능이 저하될 수 있음.  
+```
+
+```
+
+### 스칼라 서브쿼리
+SELECT절에 사용하는 서브쿼리.  
+SELECT절에 하나의 열 영역으로서 결과를 출력할 수 있음.  
+반드시 하나의 결과만 반환하도록 작성해야 함.  
+```SQL
+SELECT EMPNO, ENAME, JOB, SAL,
+  (SELECT GRADE 
+    FROM SALGRADE
+    WHERE E.SAL BETWEEN LOSAL AND HISAL) AS SALGRADE,
+    DEPTNO,
+    (SELECT DNAME
+      FROM DEPT
+      WHERE E.DEPTNO = DEPT.DEPTNO) AS DNAME
+  FROM EMP E;
+```
+
+## 테이블 조작  
+
+```SQL
+-- TABLE 생성
+CREATE TABLE table_name
+  AS [SELECT문];
+```
+생성할 때, 속성은 같고 데이터는 비어있는 테이블로 복사하려면 `WHERE 1<>1`(FALSE) 를 적음.  
+
+```SQL
+-- TABLE 삭제
+DROP TABLE table_name;
+```
+
+### INSERT문  
+테이블에 데이터를 추가하는 명령어  
+```SQL
+INSERT INTO table_name [(col1,col2,...)]
+VALUES (col1_value, col2_value...);
+```
+INSERT INTO : 새로운 데이터를 입력할 대상 테이블과 열을 입력.  
+VALUES : INSERT INTO에서 지정한 테이블의 열 순서와, 자료형에 맞는 입력 데이터를 저장.  
+
+값을 넣을 때, 순서, 자료형, 개수가 맞지 않으면 오류 발생.  
+제약 조건도 맞아야 함.  
+
+INSERT INTO에 col_name는 적지 않아도 됨.  
+
+DATE 속성 열에 값을 넣을 때, 문자열로 적으면 자동으로 맞는 날짜 형식으로 형변환 되어 삽입됨.  
+TO_DATE()나 SYSDATE로도 값 삽입 가능.  
+
+빈 값을 넣을 때는 `NULL`, ''로 삽입 가능.  
+그러나 가끔 빈 문자열이 들어가는 경우가 있어서, `NULL`을 넣는게 확실한 방법임.  
+또는 INSET INTO에서 비워두고 싶은 곳을 생략하는 방법도 있음.  
+
+```SQL
+-- NULL 삽입
+INSERT INTO DEPT_TEMP(DEPTNO, DNAME, LOC)
+  VALUES(90, 'INCHEON', NULL);
+-- 빈 문자열 '' 삽입
+INSERT INTO DEPT_TEMP(DEPTNO, DNAME, LOC)
+  VALUES(90, 'INCHEON', '');
+-- col_name 생략
+INSERT INTO DEPT_TEMP(DEPTNO, LOC)
+  VALUES(90, 'INCHEON');
+```
+#### 다른 테이블의 데이터를 삽입  
+SELECT문을 통해 데이터를 선택하여 삽입함.  
+VALUES를 사용하지 않음.  
+다른 테이블의 데이터를 삽입하는 예시  
+```SQL
+INSERT INTO EMP_TEMP (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+            SELECT E.EMPNO, E.ENAME, E.JOB, E.MGR, E.HIREDATE, E.SAL, E.COMM, E.DEPTNO
+                FROM EMP E JOIN SALGRADE S ON(E.SAL BETWEEN S.LOSAL AND S.HISAL)
+                    WHERE S.GRADE = 1;
+```
+
+ALL, FIRST 등의 옵션으로, 한 번에 여러 테이블을 대상으로 데이터를 추가하거나,  
+특정 조건에 따라 다른 테이블에 데이터를 추가하는 등 다양하게 사용할 수 있음.  
+
+MERGE문을 사용하면, 같은 열 구조를 가지는 여러 테이블 또는 서브쿼리의 결과 데이터를  
+한 테이블에 병합하여 추가할 수도 있음.  
+
+### UPDATE문  
+테이블에 저장되어 있는 데이터 내용을 수정하는 명령어.  
+```SQL
+-- 기본형식  
+UPDATE [table_name]
+SET    [col_name1] = [value1], [col_name2] = [value2]...
+WHERE [데이터를 변경할 대상 행을 선별하는 조건];
+--- DEPT_TEMP2 테이블에서 DEPTNO가 40인 열의 LOC 데이터를 SEOUL로 수정
+UPDATE DEPT_TEMP2
+SET LOC = 'SEOUL'
+WHERE DEPTNO = 40;
+```
+`UPDATE` : 데이터를 수정할 테이블을 지정.  
+`SET` : 변경할 열을 선택, 변경할 데이터를 입력.  
+`WHERE` : 테이블의 변경할 데이터 선별 조건식을 지정. 생략 시, 테이블 내 지정된 모든 열의 데이터 변경.  
+
+WHERE 절을 쓰지 않아, 모든 행의 데이터가 변경됐을 때,  
+`ROLLBACK;`(TCL) 명령어를 사용하면 원래대로 돌릴 수 있음.  
+
+UPDATE문에도 서브쿼리 사용 가능.  
+SET 조건을 정확히 알 수 없을 때 사용함.  
+
+```SQL
+-- 서브쿼리를 이용한 UPDATE문
+
+-- DEPT_TEMP2 테이블에서 DEPTNO가 40인 열의 LOC 데이터를, 
+-- DEPT 테이블에서 DEPTNO가 40인 열의 LOC 데이터로 수정
+
+UPDATE DEPT_TEMP2 
+SET (DNAME, LOC) = (SELECT DNAME, LOC FROM DEPT WHERE DEPTNO = 40)
+WHERE DEPTNO = 40;
+
+-- DEPT_TEMP2 테이블에서 DNAME이 OPERATIONS인 열의 LOC를 SEOUL로 수정
+UPDATE DEPT_TEMP2
+SET LOC = 'SEOUL'
+WHERE DEPTNO = (SELECT DEPTNO FROM DEPT_TEMP2 WHERE DNAME='OPERATIONS');
+```
+
+UPDATE문을 사용할 때는 변경하려는 대상을 정확히 알고 수행해야 함.  
+
+### DELETE문  
+테이블에 저장되어 있는 데이터 내용을 삭제하는 명령어.  
+```SQL
+DELETE FROM [table_name]
+WHERE [삭제할 대상 행을 선별하기 위한 조건식]; 
+```
+DELETE : 데이터를 삭제할 테이블을 지정.  
+WHERE : 삭제할 데이터를 선별하는 조건식을 지정. 생략 시, 테이블 내 모든 데이터를 삭제.  
+
+```SQL
+-- EMP_TEMP2 테이블에서 DEPTNO가 30이고 GRADE가 3인 사원들을 삭제
+DELETE FROM EMP_TEMP2
+WHERE EMPNO IN(SELECT E.EMPNO FROM EMP_TEMP2 E JOIN SALGRADE S ON (E.SAL BETWEEN S.LOSAL AND S.HISAL) WHERE E.DEPTNO=30 
+AND S.GRADE=3);
+
+-- EMP_TEMP 테이블에서 급여가 3000이상인 사원들을 삭제
+DELETE FROM EMP_TEMP
+WHERE SAL >=3000;
+-- 서브쿼리 사용
+DELETE FROM EMP_TEMP
+WHERE EMPNO IN(SELECT EMPNO FROM EMP_TEMP WHERE SAL>=3000);
+```
