@@ -261,8 +261,6 @@ ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.
     ![alt text](../../image/scottdb_salgrade.png)  
     table 구성 요소는 대문자로 적는 것을 권장.  
 
-## 문법  
-
 ## 데이터 제어 명령어(DML)  
 
 ### SELECT문  
@@ -1176,12 +1174,22 @@ INSERT INTO EMP_TEMP (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
                 FROM EMP E JOIN SALGRADE S ON(E.SAL BETWEEN S.LOSAL AND S.HISAL)
                     WHERE S.GRADE = 1;
 ```
+다른 테이블의 데이터를 삽입하는데, 다른 테이블엔 존재하지 않는 열에는 NULL을 넣는 예시
+```SQL
+-- EMP_HW에 EMP에는 없는 REMARK 열이 있다고 가정.
+-- 열 이름으로 NULL을 넣으면 NULL 값이 입력됨.
+INSERT INTO EMP_HW
+    SELECT EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO, NULL
+        FROM EMP;
+```
 
 ALL, FIRST 등의 옵션으로, 한 번에 여러 테이블을 대상으로 데이터를 추가하거나,  
 특정 조건에 따라 다른 테이블에 데이터를 추가하는 등 다양하게 사용할 수 있음.  
 
 MERGE문을 사용하면, 같은 열 구조를 가지는 여러 테이블 또는 서브쿼리의 결과 데이터를  
 한 테이블에 병합하여 추가할 수도 있음.  
+
+---
 
 ### UPDATE문  
 테이블에 저장되어 있는 데이터 내용을 수정하는 명령어.  
@@ -1223,6 +1231,8 @@ WHERE DEPTNO = (SELECT DEPTNO FROM DEPT_TEMP2 WHERE DNAME='OPERATIONS');
 
 UPDATE문을 사용할 때는 변경하려는 대상을 정확히 알고 수행해야 함.  
 
+---
+
 ### DELETE문  
 테이블에 저장되어 있는 데이터 내용을 삭제하는 명령어.  
 ```SQL
@@ -1245,3 +1255,215 @@ WHERE SAL >=3000;
 DELETE FROM EMP_TEMP
 WHERE EMPNO IN(SELECT EMPNO FROM EMP_TEMP WHERE SAL>=3000);
 ```
+
+# 트랜잭션(TRANSACTION)  
+```
+관계형 데이터베이스에서 하나의 작업 또는 밀접하게 연관되어 있는 작업 수행을 위해 나눌 수 없는 최소 수행 단위를  
+트랜잭션이라고 합니다. SQL 문법 중 이러한 트랜잭션을 제어하는 데 사용하는 명령어를 TCL(Transaction Control Language)라고 합니다.  
+```
+트랜잭션 : 작업 단위.  
+더 이상 분할해서는 안 되는, 할 수 없는 최소 수행 단위.  
+어떠한 기능 한 가지를 수행하는 SQL문 덩어리.  
+
+하나의 트랜잭션 내에 있는 여러 명령어를 한 번에 수행하여 작업을 완료한 상태와,  
+아예 모두 수행하지 않은 상태로 나뉨. (ALL OR NOTHING)  
+
+한 개 이상의 DML로 이루어짐.  
+
+트랜잭션을 제어하기 위해 TCL 명령어를 사용함.  
+트랜잭션은 데이터베이스 계정을 통해 데이터베이스에 접속하는 동시에 시작됨.  
+TCL을 실행할 때 기존 트랜잭션이 끝나고, 새로운 트랜잭션이 다시 시작됨.  
+
+```SQL
+SQL> INSERT...
+SQL> UPDATE...
+SQL> DELETE...
+SQL> TCL...
+-- 트랜잭션 종료
+-- 새로운 트랜잭션 시작
+SQL> INSERT...
+SQL> UPDATE...
+SQL> DELETE...
+SQL> TCL...
+-- 트랜잭션 종료
+...
+-- 새로운 트랜잭션 시작
+SQL> INSERT...
+SQL> UPDATE...
+SQL> DELETE...
+SQL> TCL...
+```
+ROLLBACK, COMMIT 과 같은 TCL 명령어를 수행할 때, 한 트랜잭션 단위로 작업이 수행되어 데이터 베이스에 반영됨.  
+한 번 COMMIT을 하면, 새로운 트랜잭션이 시작되기 때문에, 이전 트랜잭션 상태로 되돌릴 수 없음.  
+<img style="width:600px" src="../../image/TRANSACTION.png">
+
+# 세션 (SESSION)  
+```
+오라클 데이터베이스에서의 세션은 데이터베이스 접속 시작부터 접속이 종료되기까지의 전체 기간을 의미합니다.
+하나의 세션은 여러 SQL문이 하나의 작업 단위로 다뤄지는 여러 개의 트랜잭션으로 구성됩니다.
+트랜잭션 작업을 데이터베이스에 영구히 반영할 때 COMMIT 명령어를 사용하고
+지금까지 한 작업을 취소할 때 ROLLBACK 명령어를 사용합니다.
+이 명령어를 통해 현재 트랜잭션이 종료될 때까지 다른 세션에서는 데이터 조작 전 상태의 데이터만 조회할 수 있으며
+이러한 특성을 읽기일관성이라고 합니다.
+```
+어떤 활동을 위한 시간이나 기간.  
+데이터베이스에서의 세션은 데이터베이스 접속을 시작으로, 작업을 수행한 후 접속을 종료하기까지 전체 기간을 의미함.  
+데이터베이스 세션은 어느 곳에서 접속하느냐에 따라 각각 다른 세션으로 나뉨.(cmd, sql developer 등)  
+
+세션 내에는 하나 이상의 트랜잭션이 존재함.  
+  <fieldset style="width:300px">
+    <legend>세션</legend>
+      <fieldset>
+        <legend>트랜잭션1</legend>
+      </fieldset>
+      <fieldset>
+        <legend>트랜잭션2</legend>
+      </fieldset>
+      ...
+      <fieldset>
+        <legend>트랜잭션n</legend>
+      </fieldset>
+  </fieldset>
+<br>
+
+트랜잭션이 TCL로 끝나지 않으면, 해당 변경 사항은 다른 세션에서 조회할 때 `변경되지 않은 상태`로 조회 됨.  
+이러한 특성을 일관성이라고 함.  
+즉 확정된 데이터만 읽기 일관성이 보장됨.  
+![alt text](../../image/sql_session.PNG)  
+
+### LOCK  
+특정 세션에서 ROLLBACK, COMMIT으로 트랜잭션이 완료되지 않은 상태라면,  
+다른 세션에서 접근할 수 없도록 `잠긴 상태`가 됨.  
+
+LOCK으로 인해 접근하지 못하고 대기하는 상태를 `HANG`이라고 함.  
+
+명령어를 어떤 방식으로 작성하느냐에 따라 `LOCK의 종류`가 달라짐.  
+
+- LOCK의 종류  
+  - `행 레벨 록 (row level lock)` :  
+  `WHERE절을 지정한` UPDATE, DELETE문을 수행한 경우, 해당 행을 잠금.  
+  `WHERE절을 지정하지 않은` UPDATE, DELETE문을 수행한 경우, 해당 테이블의 모든 행을 잠금.  
+  UPDATE, DELETE 명령을 수행하는 세션은 `HANG` 상태에 들어감.  
+  그러나 테이블 전체 행이 LOCK 상태여도, INSERT문의 수행은 가능함.  
+
+  - `테이블 레벨 록 (table level lock)` :  
+  테이블에 변경되는 행의 수와는 상관없이,  
+  DML을 사용하여 데이터가 변경 중인 테이블은, 테이블 단위 잠금이 걸림.  
+  데이터를 변경 중인 세션 외 다른 세션에서 `DDL`을 통해 테이블의 구조를 변경할 수 없음.  
+
+## DDL(Data Definition Language)  
+데이터 베이스 정의어.  
+객체를 생성, 변경, 삭제하는 등의 기능을 수행하는 명령어.  
+DML과 달리, <span style="text-decoration:underline">명령어를 수행하자마자 데이터베이스에 수행한 내용이 바로 반영됨.</span>  
+즉, DDL을 실행하면 자동으로 COMMIT되기 때문에, ROLLBACK으로 실행 취소가 불가능함.  
+(이러한 이유로 실무에서는 자주 사용하지 않음)  
+
+- `CREATE` : 데이터베이스 객체를 생성함  
+  ```SQL
+  CREATE TABLE account.table_name(
+    row1_name row1_type,
+    row2_name row2_type,
+    ...
+    rown_name rown_type,
+  );
+  -- 소유 계정 이름을 생략하면, 현재 접속해 있는 계정 소유의 테이블이 만들어짐.
+  -- 기본적으로 테이블 명은 대소문자 구별X. ""를 통해 대문자 지정 가능.
+  -- 테이블의 열을 하나하나 만들어 생성하는 예시
+  CREATE TABLE EMP_DDL(
+    EMPNO NUMBER(4),
+    ENAME VARCHAR2(10),
+    JOB VARCHAR2(9),
+    MGR NUMBER(4),
+    HIREDATE DATE,
+    SAL NUMBER(7,2),
+    COMM NUMBER(7,2),
+    DEPTNO NUMBER(2)
+  );
+  -- 다른 테이블을 그대로 복사하여 생성하는 예시
+  CREATE TABLE DEPT_DDL AS SELECT * FROM DEPT;
+  DESC DEPT_DDL;
+  SELECT * FROM DEPT_DDL;
+  -- 다른 테이블의 일부를 복사하여 생성하는 예시
+  CREATE TABLE EMP_DDL_30 AS SELECT * FROM EMP WHERE DEPTNO=30;
+  SELECT * FROM EMP_DDL_30;
+  -- 다른 테이블들을 조인한 테이블을 생성하는 예시
+  CREATE TABLE EMPDEPT_DDL AS SELECT * FROM EMP JOIN DEPT USING (DEPTNO)
+  WHERE 1<>1;
+  -- 모든 레코드에, 적용 결과를 FALSE로 나타나도록 하여 테이블 틀만 복사함.
+  ```
+  테이블 이름 생성 규칙  
+   - 테이블 이름은 문자로 시작해야 함.  
+   - 테이블 이름은 30BYTE 이하여야 함.  
+   - 같은 사용자 소유의 테이블 이름은 중복될 수 없음.  
+   - 테이블 이름은 영문자, 한글, 숫자와 특수 문자 $#_ 사용 가능.  
+   - 예약어는 테이블 이름으로 사용 불가.  
+
+- `ALTER` : 데이터베이스 객체를 변경함  
+  컬럼을 추가, 변경, 삭제할 수 있음.  
+  마찬가지로 변경 후에 ROLLBACK 불가능.  
+  ADD(추가), RENAME(이름변경), MODIFY(타입변경), DROP(삭제)으로 컬럼을 변경함.  
+  ```SQL
+  ALTER TABLE table_name
+    -- 열 추가
+    ADD col_name coltype
+    -- 열 이름 변경
+    RENAME COLUMN col_name TO col_newname
+    -- 열 타입 변경
+    MODIFY col_name col_type
+    -- 열 삭제
+    DROP COLUMN col_name;
+  ```
+- `TRUNCATE` : 데이터베이스 객체의 내용을 삭제함.  
+  마찬가지로 변경 후에 ROLLBACK 불가능.  
+  DELETE보다 속도가 빠름.  
+  ```SQL
+  TRUNCATE TABLE table_name;
+  ```
+- `DROP` : 데이터베이스 객체를 삭제함  
+  DELETE, TRUNCATE와 달리 객체 자체를 삭제하고, 되돌릴 수 없음.  
+  ```SQL
+  DTOP TABLE table_name;
+  ```
+  DELETE, TRUNCATE, DROP의 차이 : https://wikidocs.net/4021  
+  <img src="../../image/D_T_D_DIFFERENCE.png" style="width:600px">  
+
+  # 데이터 객체  
+  ### 데이터 사전(DATA DICTIONARY)  
+  ```
+  데이터 사전은 오라클 데이터베이스를 구성하고 운영하는 데이터를 저장하는 특수한 테이블로서 오라클 사용자가 직접 접근할수 없습니다.  
+  하지만 SELECT문으로 데이터를 열람할 수 있도록 데이터 사전 뷰를 제공합니다.  
+  대표적인 데이터 사전 뷰 중 현재 접속한 사용자가 소유하는 테이블 목록을 보기 위해서는 USER_TABLES를 사용합니다.  
+  또한 사용자가 소유하는 테이블을 포함해 다른 사용자가 소유한 테이블 중 현재 사용자에게 사용 허가가 되어있는 테이블을 보기 위해서는 ALL_TABLES를 사용합니다.  
+  ```
+  ### 뷰(VIEW)  
+  열람을 주 목적으로 사용하는 객체.  
+  원본 데이터에 접근할 수 없음.  
+
+  데이터 사전 뷰는 용도에 따라 이름 앞에 접두어를 지정하여 분류함.  
+  - `USER_XXXX` : 현재 데이터베이스에 접속한 사용자가 소유한 객체 정보  
+  - `ALL_XXXX` : 접속한 사용자가 소유한 객체 또는 다른 사용자가 소유한 객체 중 사용 허가를 받은 객체, 즉 사용 가능한 모든 객체 정보  
+  - `DBA_XXXX` : 데이터베이스 관리를 위한 정보(관리 권한을 가진 SYSTEM, SYS 사용자만 열람 가능)  
+  - `V$_XXXX` : 데이터베이스 성능 관련 정보(X$_XXXX 테이블의 뷰)  
+  
+  [SCOTT 데이터 사전 뷰](../../image/SCOTT_DICT.pdf)  
+
+  ### 인덱스  
+  데이터를 조회할 때 더 빠른 검색을 위해 사용함.  
+  ```SQL
+  -- 인덱스 생성 기본형
+  CREATE INDEX index_name
+    ON table_name(row_name1 ASC|DESC,
+                  row_name2 ASC|DESC,
+                  ...               );
+  -- 인덱스 생성 예시
+  CREATE INDEX IDX_EMP_SAL
+    ON EMP(SAL);
+  -- 인덱스 삭제 예시
+  DROP INDEX IDX_EMP_SAL;
+  -- 사용자가 소유한 인덱스를 조회
+  SELECT * FROM USER_IND_COLUMNS;
+  ```
+  ![인덱스 종류](image.png)  
+  비트맵 인덱스 : 남/여밖에 들어갈 수 밖에 없는 성별같은 데이터를 조회할 때 사용함.  
+
+  인덱스를 무한정 만든다고 검색 성능이 높아지진 않음.  
