@@ -1436,16 +1436,85 @@ DML과 달리, <span style="text-decoration:underline">명령어를 수행하자
   또한 사용자가 소유하는 테이블을 포함해 다른 사용자가 소유한 테이블 중 현재 사용자에게 사용 허가가 되어있는 테이블을 보기 위해서는 ALL_TABLES를 사용합니다.  
   ```
   ### 뷰(VIEW)  
-  열람을 주 목적으로 사용하는 객체.  
-  원본 데이터에 접근할 수 없음.  
+  ```
+  하나 이상의 테이블을 조회하는 SELECT문을 저장한 객체. 물리적 데이터를 따로 저장하지 않음.  
+  ```
+  열람을 주 목적으로 사용하는 객체. 흔히 가상 테이블이라고 부름.  
+  실제로는 존재하지 않고, 원본 데이터에 접근할 수 없음.  
+  SELECT문의 FROM절에 사용하면 특정 테이블을 조회하는 것과 같은 효과를 얻을 수 있음.  
+  실제로 데이터 조작이 불가능하진 않지만, 조회를 목적으로 만들어진 테이블이기 때문에 잘못된 값이 들어갈 수 있고, 조건이 까다롭기 때문에 권장하지 않음.  
+
+  뷰의 사용 목적  
+  편리성 : SELECT문의 복잡도를 완화함.  
+  보안성 : 테이블의 특정 열을 노출하고 싶지 않을 경우.  
+
+  ```SQL
+  -- 뷰 생성은 권한이 필요함.  
+  -- 권한 부여 cmd  
+  sqlplus system/oracle  
+  grant CREATE VIEW to scott;  
+  ```
+  ![alt text](image-1.png)  
+  ```SQL
+  CREATE VIEW VW_EMP20
+    AS (SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP WHERE DEPTNO=20);
+  SELECT * FROM VW_EMP20;
+  -- 아래 SQL문과 같음.
+  -- SELECT * FROM (SELECT EMPNO, ENAME, JOB, DEPTNO, FROM EMP WHERE DEPTNO=20);
+  ```
+
+
 
   데이터 사전 뷰는 용도에 따라 이름 앞에 접두어를 지정하여 분류함.  
   - `USER_XXXX` : 현재 데이터베이스에 접속한 사용자가 소유한 객체 정보  
   - `ALL_XXXX` : 접속한 사용자가 소유한 객체 또는 다른 사용자가 소유한 객체 중 사용 허가를 받은 객체, 즉 사용 가능한 모든 객체 정보  
   - `DBA_XXXX` : 데이터베이스 관리를 위한 정보(관리 권한을 가진 SYSTEM, SYS 사용자만 열람 가능)  
   - `V$_XXXX` : 데이터베이스 성능 관련 정보(X$_XXXX 테이블의 뷰)  
+  ```SQL
+  -- 사용자가 소유한 뷰 목록 조회
+  SELECT * FROM USER_VIEWS;
+  ```
   
   [SCOTT 데이터 사전 뷰](../../image/SCOTT_DICT.pdf)  
+  
+  ---
+
+  ### 인라인 뷰를 사용한 TOP-N SQL문  
+  #### 인라인 뷰  
+  SQL문에서 일회성으로 만들어서 사용하는 뷰.  
+  SELECT문에서 사용되는 서브쿼리, WITH절에서 미리 이름을 정의해두고 사용하는 SELECT문 등이 이에 해당됨.  
+
+  ```sql
+  SELECT ROWNUM, E.*
+  FROM EMP E;
+  ```
+  <img src="../../image/ROWNUM.PNG" style="width:600px">  
+
+  #### 특수컬럼(의사열)  
+  실제 존재하는 데이터는 아니고, 특정 목적을 위해서 사용되는 열  
+  
+  `ROWNUM` : 가장 많이 쓰이는 특수 컬럼. 데이터 순서대로 번호를 매김. 이 번호는 다른 행을 기준으로 ORDER BY 해도 바뀌지 않음.  
+
+  ```SQL
+  SELECT ROWNUM, E.*
+  FROM (SELECT ROWNUM AS INNER_ROWNUM, E.* FROM EMP E ORDER BY SAL DESC) E;
+  ```
+  <img src="../../image/ROWNUM_2.PNG">  
+
+
+  - ROWNUM을 통해 상위 데이터들을 조회하는 구문을 작성할 수 있음.  
+  ```SQL
+  -- WITH절과 ROWNUM을 통해 상위 3명을 조회하는 구문
+  WITH E AS (SELECT * FROM EMP E ORDER BY SAL DESC)
+  SELECT ROWNUM, E.*
+  FROM E
+  WHERE ROWNUM <=3;
+  -- FROM절에서 SAL 기준 내림차순 정렬이 완료된 상태로 ROWNUM을 적용시킴.
+  ```
+  #### ROWNUM을 활용한 예시들  
+  ![alt text](../../image/ROWNUMEX_1.png)  
+  ![alt text](../../image/ROWNUMEX_2.png)  
+  ![alt text](../../image/ROWNUMEX_3.png)  
 
   ### 인덱스  
   데이터를 조회할 때 더 빠른 검색을 위해 사용함.  
@@ -1463,7 +1532,259 @@ DML과 달리, <span style="text-decoration:underline">명령어를 수행하자
   -- 사용자가 소유한 인덱스를 조회
   SELECT * FROM USER_IND_COLUMNS;
   ```
-  ![인덱스 종류](image.png)  
-  비트맵 인덱스 : 남/여밖에 들어갈 수 밖에 없는 성별같은 데이터를 조회할 때 사용함.  
+  <table border="1">
+    <thead>
+      <tr>
+        <th>방식</th>
+        <th>사용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>단일 인덱스 (SINGLE INDEX)</td>
+        <td>CREATE INDEX idx_name ON table_name(row_name);</td>
+      </tr>
+      <tr>
+        <td>복합 인덱스 (CONCATENATED INDEX) | 결합 인덱스 (COMPOSITE INDEX)<br>- 두 개 이상 열로 만들어지는 인덱스. <br> -WHERE 절의 두 열이 AND 연산으로 묶이는 경우</td>
+        <td>CREATE INDEX idx_name ON table_name(row_name1, row_name2, ...);</td>
+      </tr>
+      <tr>
+        <td>고유 인덱스 (UNIQUE INDEX)<br>
+        - 열에 중복 데이터가 없을 때 사용.<br>
+        - UNIQUE 키워드를 지정하지 않으면 비고유 인덱스가 기본값</td>
+        <td>CREATE UNIQUE INDEX idx_name ON table_name(row_name);</td>
+      </tr>
+      <tr>
+        <td>함수 기반 인덱스 (FUNCTION BASED INDEX)<br>
+        - 열에 산술식 같은 데이터 가공이 진행된 결과로 인덱스 생성</td>
+        <td>CREATE INDEX idx_name ON table_name(function);</td>
+      </tr>
+      <tr>
+        <td>비트맵 인덱스 (BITMAP INDEX)<br>
+        - 데이터 종류가 적고 같은 데이터가 많이 존재할 때 주로 사용<br>
+        - 성별같이 남/여밖에 들어갈 수 없는 데이터를 조회할 때 사용함
+        </td>
+        <td>CREATE BITMAP INDEX idx_name ON table_name(row_name);</td>
+      </tr>
+    </tbody>
+  </table>
 
   인덱스를 무한정 만든다고 검색 성능이 높아지진 않음.  
+
+  ---
+
+  ### 시퀀스(SEQUENCE)  
+  오라클 데이터베이스에서, 특정 규칙에 맞는 연속 숫자를 생성하는 객체.  
+  ```SQL
+  CREATE SEQUENCE sequence_name 
+  [INCREMENT BY] 
+  [START WITH]
+  [MAXVALUE n | NOMAXVALUE]
+  [MINVALUE n | NOMINVALUE]
+  [CYCLE | NOCYCLE]
+  [CACHE n | NOCACHE]
+  ```
+  `INCREMENT BY` : 시퀀스에서 생성할 번호의 증가 값. (기본값은 1)  
+  `START WITH` : 시퀀스에서 생성할 번호의 시작 값. (기본값은 1)  
+  `MAXVALUE` | `NOMAXVALUE` : 생성할 번호의 최댓값 지정. 범위는 시작값 이상, 최솟값 초과로 지정.  
+
+  ![alt text](image-3.png)
+
+  ```SQL
+  -- 시퀀스 생성 예시
+  CREATE SEQUENCE SEQ_DEPT_SEQUENCE
+    INCREMENT BY 10
+    START WITH 10
+    MAXVALUE 90
+    MINVALUE 0
+    NOCYCLE
+    CACHE 2;
+  -- 사용자 시퀀스 조회
+  SELECT * FROM USER_SEQUENCES;
+  -- LAST_NUMBER에 있는 값이 마지막 값.
+  -- 시퀀스의 현재 값을 확인하는 CURRVAL
+  SELECT SEQ_DEPT_SEQUENCE.CURRVAL
+  FROM DUAL;
+  -- 값을 증가시키면서 세팅하는 NEXTVAL
+  INSERT INTO DEPT_SEQ (DEPTNO, DNAME, LOC)
+    VALUES(SEQ_DEPT_SEQUENCE.NEXTVAL, 'DATABASE', 'SEOUL');
+    -- 시퀀스 수정
+  ALTER SEQUENCE SEQ_DEPT_SEQUENCE
+    INCREMENT BY 50
+    MAXVALUE 99
+    NOCYCLE;
+    -- 시퀀스 삭제
+  DROP SEQUENCE SEQ_DEPT_SEQUENCE;
+    
+  ```
+
+  > ALTER 명령어로 시퀀스를 수정할 수 있지만, START WITH 옵션은 수정할 수 없음.  
+
+  단지 연속하는 새로운 번호를 만드는 일이라면, MAX 함수에 1을 더한 값을 사용해도 상관 없음.  
+  ```SQL
+  SELECT MAX(글 번호) + 1
+    FROM 게시판 테이블
+  ```
+  이 방식은 웹 서비스의 게시판 번호, 상품 주문 번호를 생성할 때 종종 사용하는 방식임.  
+  그러나 이 방식은 SELECT라서 LOCK이 걸리지 않아 같은 번호가 생성될 수도 있고,  
+  숫자가 높아질 수록 과부하가 걸릴 확률이 높아짐.  
+
+### 동의어(SYNONYM)  
+객체 이름 대신 사용할 수 있는 다른 이름을 부여하는 객체.  
+주로 테이블 이름이 너무 길 때 사용함.  
+ALIAS는 일회성.  
+```SQL
+-- 기본형
+CREATE [PUBLIC] SYNONYM 동의어 이름
+FOR[사용자.][객체 이름];
+
+-- 예시
+CREATE SYNONYM E FOR EMP;
+```
+![alt text](image-4.png)  
+
+```
+시퀀스, public 시퀀스 생성 권한을 부여하는 cmd 명령어
+
+grant CREATE SYNONYM to scott;
+grant CREATE PUBLIC SYNONYM to scott;
+```
+
+# Constraints(제약 조건)  
+```
+제약 조건은 어떤 테이블에 저장할 데이터 특성을 정의하는 데 사용하는 특수한 규칙을 뜻합니다.  
+오라클 데이터베이스에서 사용할 수 있는 제약 조건은 다섯 가지가 있는데요.  
+지정한 열에 NULL 값을 제외한 값의 중복이 불가능한 UNIQUE, NULL을 허용하지 않는 NOT NULL,  
+다른 테이블의 열을 참조하는 FOREIGN KEY, NULL값과 데이터의 중복을 모두 허용하지 않는 PRIMARY KEY가 있습니다.  
+```
+테이블에 저장할 데이터를 제약하는 특수한 규칙.  
+DDL로 설정할 수 있음.  
+제약 조건도 하나의 객체임.  
+
+- 오라클 데이터베이스 제약 조건 종류  
+  - `NOT NULL` : 지정한 열에 NULL을 허용하지 않음. 중복 허용.  
+  - `UNIQUE` : 지정한 열에 중복을 허용하지 않음. NULL은 중복에서 제외.  
+  - `PRIMARY KEY` : UNIQUE, NOT NULL을 모두 사용. 테이블에 하나만 지정 가능. 해당 열에 자동으로 인덱스가 생성됨.  
+  - `FOREIGN KEY` : 다른 테이블의 열을 참조하여 존재하는 값만 입력할 수 있음.   
+  - `CHECK` : 설정한 조건식을 만족하는 데이터만 입력 가능.  
+  - `DEFAULT` : 값을 지정하지 않은 경우에 설정할 기본값을 지정할 수 있음.  
+
+  > 참고 : PK, FK 모두 후보키이기 때문에, 중복, NULL을 허용할 수 없음.  
+  테이블 생성 시, 열 타입 뒤에 적어주면 해당 제약 조건이 적용됨.  
+  ```SQL
+  -- 테이블을 생성하면서 제약조건 지정
+  create table table_notnull(
+    login_id varchar2(20) not null,
+    login_pwd varchar2(20) not null,
+    tel varchar2(20)
+  );
+  -- 제약조건 이름도 지정
+  create table table_notnull2(
+    login_id varchar2(20) CONSTRAINT TBLNN2_LGNID_NN not null,
+    login_pwd varchar2(20) CONSTRAINT TBLNN2_LGNPW_NN not null,
+    tel varchar2(20)
+  );
+  -- OUTOFLINE 방식. 제약조건 지정을 마지막에 몰아서 쓰거나, 열 생성 후 제약조건을 따로 추가.
+  CREATE TABLE TABLE_NAME(
+    COL1 VARCHAR2(20),
+    COL2 VARCHAR2(20),
+    COL3 VARCHAR2(20),
+    PRIMARY KEY (COL1),
+    CONSTRAINT CONSTRAINT_NAME UNIQUE(COL2)
+  );
+
+  -- 기존에 있는 테이블에 제약조건을 추가
+  ALTER TABLE TABLE_NOTNULL
+    MODIFY(TEL NOT NULL);
+  -- 제약조건 이름도 지정
+  ALTER TABLE TABLE_NOTNULL
+    MODIFY(TEL CONSTRAINT TBLNN_TEL_NN NOT NULL);
+
+  -- 제약 조건 이름 변경. 테이블을 지정한 뒤에 제약조건 이름을 변경함.
+  ALTER TABLE TABLE_NOTNULL2
+    RENAME CONSTRAINT TBLNN_TEL_NN TO TBLNN2_TEL_NN;
+  -- 제약 조건 삭제. 테이블을 지정한 뒤에 제약조건을 삭제함.
+  ALTER TABLE TABLE_NOTNULL2
+    DROP CONSTRAINT TBLNN2_TEL_NN;
+  ```
+  > 제약 조건을 변경할 때, 이미 존재하는 데이터가 변경하려는 제약조건에 맞지 않으면 변경할 수 없음.  
+  또한 ALTER로 테이블을 지정한 뒤에, 제약 조건을 변경해야 함.  
+
+  #### FOREIGN KEY 제약조건 설정  
+  ```SQL
+  -- FOREIGN KEY 제약조건 설정
+  CREATE TABLE TABLE_NAME(
+  ...
+  row_name row_type CONSTRAINT cosntraint_name REFERENCES TABLE_NAME(ROW_NAME)
+  );
+  -- FOREIGN KEY라고 지정하지 않고, REFERENCE 키워드 + 연결할 테이블명(연결할 열명)로 연결함.
+  ```
+  외래키 특징 :  
+  자식 레코드가 있으면, 해당 열을 삭제할 수 없음.  
+  외래키 열이 생성되지 않은 상태라면, 데이터를 삽입할 수 없음.  
+  ```SQL
+  -- 열 데이터를 삭제할 때, 이 데이터를 참조하는 데이터를 NULL로 수정
+  CONSTRAINT [제약 조건 이름] REFERENCES 참조 테이블(참조할 열) ON DELETE SET NULL;
+  -- 열 데이터를 삭제할 때, 이 데이터를 참조하는 데이터를 모두 삭제
+  CONSTRAINT [제약 조건 이름] REFERENCES 참조 테이블(참조할 열) ON UPDATE CASCADE;
+  ```
+  #### CHECK 제약 조건 설정  
+  ```SQL
+  CREATE TABLE TABLE_CHECK(
+    ...
+    row_name row_type CONSTRAINT constraint_name CHECK (조건)
+  );
+
+  --- 3글자 이상인 값만 들어갈 수 있게 제한한 예시.
+
+  CREATE TABLE TABLE_CHECK(
+    LOGIN_PWD VARCHAR2(20) CONSTRAINT TBLCK_LOGINPW_CK CHECK (LENGTH(LOGIN_PWD)>3)
+  );
+  ```
+  #### DEFAULT 제약 조건  
+  값을 지정하지 않았을 때, 기본으로 들어갈 값을 지정할 수 있음.  
+  ```SQL
+  row_name row_type DEFAULT 기본값;
+
+  -- LOGIN_PWD에 기본값으로 1234를 지정하는 예시.
+
+  CREATE TABLE TABLE_DEFAULT (
+    LOGIN_ID VARCHAR(20) CONSTRAINT TBLCK2_LOGINID_PK PRIMARY KEY,
+    LOGIN_PWD VARCHAR2(20) DEFAULT '1234',
+    TEL VARCHAR2(20)
+  );
+  ```
+  #### 제약조건 비활성화, 활성화  
+  테스트할 때 제약 조건을 끄고 킬 수 있음.  
+  활성화 할 때는 ENABLE절을, 비활성화 할 때는 DISABLE 절을 사용.  
+  ```SQL
+  ALTER TABLE 테이블 이름
+  DISABLE [NOVALIDATE/VALIDATE(선택)] CONSTRAINT 제약조건이름;
+
+  ALTER TABLE 테이블 이름
+  ENABLE [NOVALIDATE/VALIDATE(선택)] CONSTRAINT 제약조건이름;
+  ```
+
+  ```SQL
+  -- 사용자 제약 조건 조회
+  SELECT * FROM USER_CONSTRAINTS;
+  ```
+  - 조회 시 나오는 데이터 종류  
+    - OWNER : 제약 조건 소유 계정  
+    - CONSTRAINT_NAME : 제약 조건 이름 (정하지 않을 시, 오라클이 자동으로 지정)  
+    - CONSTRAINT_TYPE : 제약 조건 종류(앞글자를 따옴. NOT NULL은 C로, FOREIGN KEY는 R로 표시됨.)  
+    - TABLE_NAME : 제약 조건을 지정한 테이블 이름  
+
+- `데이터 무결성`이란?  
+  `Data Integrity`  
+  데이터의 정확성과 일관성을 보장한다는 의미.  
+  이를 위해 항상 유지해야 하는 기본 규칙을 갖고 있음.  
+  제약 조건은 이러한 데이터 무결성을 지키기 위한 안전장치로서 중요한 역할을 함.  
+  그리고 데이터의 삽입, 수정, 삭제 등 모든 과정에서 지켜져야 함.  
+  - 데이터 무결성 종류  
+    - `영역 무결성` : 열에 저장되는 값의 적정 여부를 확인. (형석, NULL 여부)  
+    - `개체 무결성` : 데이터를 유일하게 식별할 수 있는 기본키는, 반드시 값을 갖고 있어야 하고, NULL 불가, 중복될 수 없음을 규정    
+    - `참조 무결성` : 참조 테이블의 외래키 값은 참조 테이블의 기본키로서 존재해야 하며, NULL이 가능.  
+
+
+
