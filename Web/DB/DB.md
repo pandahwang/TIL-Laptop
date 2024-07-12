@@ -231,12 +231,9 @@ VARRAY, NESTED, TABLE
 </table>
 
 
-#### PL/SQL  
-ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.  
-이를 보완한 것이 PL/SQL.  
-
 ## 사용법  
 사용한 SQL 프로그램 : Oracle SQL Developer  
+> SID : orcl  
 - 데이터베이스 접속 예시  
     1. 접속(ID/PW)  
     2. DB 선택  
@@ -654,7 +651,7 @@ WHERE 조건의 개수 제한은 없음.
     ![alt text](../../image/SQL_Type_Conversion.PNG)  
 
   - `TO_CHAR` : 숫자 또는 날짜 데이터를 문자 데이터로 변환  
-    날짜 데이터를 분자 데이터로 변환할 때, 형식과 언어를 지정할 수 있음.  
+    날짜 데이터를 문자 데이터로 변환할 때, 형식과 언어를 지정할 수 있음.  
     language_types : https://ss64.com/ora/syntax-nls.html  
     ```
     SELECT TO_CHAR(DATEDATA, 'FORMAT', (선택)'NLS_DATE_LANGUAGE = language_type')
@@ -1786,5 +1783,686 @@ DDL로 설정할 수 있음.
     - `개체 무결성` : 데이터를 유일하게 식별할 수 있는 기본키는, 반드시 값을 갖고 있어야 하고, NULL 불가, 중복될 수 없음을 규정    
     - `참조 무결성` : 참조 테이블의 외래키 값은 참조 테이블의 기본키로서 존재해야 하며, NULL이 가능.  
 
+# 권한 조작  
 
+```SQL
+-- 권한 조작 기본 형식
+GRANT [시스템 권한] TO [사용자 이름|롤(ROLE)이름|PUBLIC]
+[WITH ADMIN OPTION](선택);
+```
+// 테이블로 변경하셈  
+`시스템 권한` : 시스템 권한 지정. ,(쉼표)로 구분하여 권한 이름을 여러 개 적으면 한 번에 부여 가능.  
+`사용자 이름|롤 이름|PUBLIC` : 권한을 부여하려는 대상을 지정. 사용자 이름을 지정 OR 롤을 지정 OR (PUBLIC)모든 사용자에게 권한을 부여. 마찬가지로 쉼표로 구분하여 여러 사용자,ROLE에 부여 가능.  
+`WITH ADMIN OPTION` : 현재 GRANT문을 통해 부여받은 권한을 다른 사용자에게 부여할 수 있는 권한도 함께 부여받음. 현재 사용자가 권한이 사라져도, 권한을 재부여한 다른 사용자의 권한은 유지됨. (대상에게 ADMIN 권한을 함께 주는 것.)  
+
+- 시스템 권한 분류      // 테이블로 변경하셈  
+  - USER(사용자)  
+    - CREATE USER : 사용자 생성 권한  
+    - ALTER USER : 생성된 사용자의 정보 수정 권한  
+    - DROP USER : 생성된 사용자의 삭제 권한  
+  - SESSION(접속)  
+    - CREATE SESSION : 데이터베이스 접속 권한  
+    - ALTER SESSION : 데이터베이스 접속 상태에서 환경 값 변경 권한  
+  - TABLE(테이블)  
+    - CREATE TABLE : 자신의 테이블 생성 권한  
+    - CREATE ANY TABLE : 임의의 스키마 소유 테이블 생성 권한  
+    - ALTER ANY TABLE : 임의의 스키마 소유 테이블 수정 권한  
+    - DROP ANY TABLE : 임의의 스키마 소유 테이블 삭제 권한  
+    - INSERT ANY TABLE : 임의의 스키마 소유 테이블 데이터 삽입 권한  
+    - UPDATE ANY TABLE : 임의의 스키마 소유 테이블 데이터 변경 권한  
+    - DELETE ANY TABLE : 임의의 스키마 소유 테이블 데이터 삭제 권한  
+    - SELECT ANY TABLE : 임의의 스키마 소유 테이블 데이터 조회 권한  
+  - INDEX(인덱스)  
+    - CREATE ANY INDEX : 임의의 스키마 소유 테이블의 인덱스 생성 권한  
+    - ALTER ANY INDEX : 임의의 스키마 소유 테이블의 인덱스 수정 권한  
+    - DROP ANY INDEX : 임의의 스키마 소유 테이블의 인덱스 삭제 권한  
+  ... 이 외에도 VIEW, SEQUENCE, SYNOSYM, PROFILE(사용자 접속 조건 지정 등), ROLE(권한을 묶은 그룹과 관련된 권한) 등 권한 부여 가능.  
+
+
+SYSTEM 계정으로 유저 생성 및 비밀번호 지정 예시  
+```SQL
+-- 유저 생성
+-- PW는 IDENTIFIED BY 로 지정
+CREATE USER PREV_HW IDENTIFIED BY ORCL;
+-- 세션 접속 권한 부여
+GRANT CREATE SESSION TO PREV_HW;
+--GRANT CONNECT TO PREV_HW; 
+
+-- 접속
+CONN PREV_HW/ORCL;
+```
+
+
+SCOTT 계정으로 테이블 관련 권한 변경 예시  
+```SQL
+-- 테이블 조회 권한 부여 GRANT TO
+-- 사용자 명은 여러 개 지정 가능하지만, 테이블은 각각 지정해줘야함.
+GRANT SELECT ON EMP TO PREV_HW;
+GRANT SELECT ON DEPT TO PREV_HW;
+GRANT SELECT ON SALGRADE TO PREV_HW;
+
+-- 테이블 조회 권한 박탈 REVOKE FROM
+REVOKE SELECT ON SALGRADE FROM PREV_HW;
+```
+
+# PL/SQL  
+ORACLE을 포함한 기존 SQL만으로는, 복잡한 RDBMS를 다루기 힘듦.  
+이를 보완한 것이 PL/SQL.  
+
+# PL/SQL의 구조  
+## 블록  
+데이터베이스 관련 특정 장업을 수행하는 명령어, 실행에 필요한 여러 요소를 정의하는 명령어 등을 모아둔 것.  
+명령어 종류 : 
+```SQL
+DECLARE  
+실행에 필요한 여러 요소 선언 (변수 선언)  
+BEGIN  
+작업을 위해 실제 실행하는 명령어  
+EXCEPTION  
+PL/SQL 수행 도중 발생하는 오류 처리  
+END;  
+```
+> DECLARE, EXCEPTION은 생략 가능.  
+
+- PL/SQL문 작성 문법  
+  1. 블록을 구성하는 DECLARE, BEGIN, EXCEPTION 키워드에는 세미콜론을 적지 않음.  
+  2. 블록의 각 부분에서 실행해야 하는 문장 끝에는 세미콜론을 적음.  
+  3. 한 줄 주석`(--)`과 여러 줄 주석`(/**/)` 사용 가능.  
+  4. 작성을 마치고 실행하기 위해 마지막에 슬래시 `/` 를 적음.  
+  > 토드 같은 응용 프로그램에서는 슬래시를 적지 않아도 실행 가능.  
+
+#### PL/SQL 구문 예시  
+```SQL
+-- SQL DEVELOPER를 쓸 때 사용하는 구문. 실행 결과를 화면에 출력하는 옵션 설정.
+SET SERVEROUTPUT ON;
+
+DECLARE
+-- TABLE 열 지정할 때와 동일함.
+V_EMPNO NUMBER(4) := 7788; -- INT V_EMPNO = 7788;
+V_TAX CONSTANT NUMBER(1) := 3;
+V_DEPTNO NUMBER(2) NOT NULL DEFAULT 10;
+V_ENAME VARCHAR2(10);
+BEGIN
+    V_ENAME := 'SCOTT';
+--    V_TAX := 4; 상수라서 값 변경 불가
+    V_DEPTNO := NULL;
+    DBMS_OUTPUT.PUT_LINE('V_ENAME : ' || V_ENAME);
+    DBMS_OUTPUT.PUT_LINE('V_TAX : ' || V_TAX);
+    DBMS_OUTPUT.PUT_LINE('V_DEPTNO : ' || V_DEPTNO);
+END;
+/
+-- /가 들어가야 완전한 문장.
+```
+
+### 스칼라형(SCALAR TYPE) 변수  
+숫자 문자열 날짜 등과 같이 오라클에서 기본으로 정의해 놓은 자료형.  
+추가로 BOOLEAN 값에 TRUE, FALSE, NULL이 존재함.  
+
+### 참조형 변수  
+특정 테이블 열의 자료형이나, 하나의 행 구조를 참조하는 자료형.  
+열을 참조할 때는 `%TYPE`, 행을 참조할 때는 `%ROWTYPE`을 사용.  
+`%TYPE`으로 선언한 변수는 지정한 테이블 열과 완전히 같은 자료형이 됨.  
+`%ROWTYPE`으로 선언한 변수는 지정한 테이블 행의 구조를 모두 가져옴.  
+
+> 행 : 가로 ROW.  
+열 : 세로 COLUMN.  
+
+#### 참조형 변수 선언 기본형
+```SQL
+변수이름 테이블이름.열이름%TYPE;
+var_name table_name.row_name%type;
+```
+//////////////////  
+```sql
+SET SERVEROUTPUT ON;
+DECLARE 
+    -- DEPTNO 열의 형식을 가져옴 
+    V_DEPTNO DEPT.DEPTNO%TYPE;
+    -- DEPT의 행 형식을 가져옴
+    V_DEPT_ROW DEPT%ROWTYPE;
+BEGIN
+--    V_DEPTNO := 50;
+--    DBMS_OUTPUT.PUT_LINE('V_DEPTNO : ' || V_DEPTNO);
+    SELECT DEPTNO, DNAME, LOC INTO V_DEPT_ROW
+        FROM DEPT WHERE DEPTNO=40;
+    DBMS_OUTPUT.PUT_LINE('DEPTNO : ' || V_DEPT_ROW.DEPTNO);
+    DBMS_OUTPUT.PUT_LINE('DNAME : ' || V_DEPT_ROW.DNAME);
+    DBMS_OUTPUT.PUT_LINE('LOC : ' || V_DEPT_ROW.LOC);
+END;
+/
+
+SELECT * FROM DEPT;
+```
+/////////////////////  
+![alt text](image-7.png)  
+
+### 복합형, LOB형  
+복합형 : 여러 종류, 개수의 데이터를 저장하기 위해 직접 정의하는 자료형.  
+컬렉션형과 레코드형으로 구분됨.  
+컬렉션(TABLE) : 한 가지 자료형의 데이터를 여러 개 저장(테이블의 열과 유사)  
+레코드(RECORD) : 여러 종류 자료형의 데이터를 저장(테이블의 행과 유사)  
+LOB형(LARGE OBJECT) : 대용량 데이터를 저장하기 위해 씀. 웹/앱 개발자는 자주 사용하지 않음.  
+
+![alt text](image-8.png)  
+
+## 조건문  
+
+### IF 조건문  
+IF문에 중괄호 대신 시작에 THEN과, 끝에 END IF가 들어가는 것 말고는 자바 IF문과 똑같음.  
+종류
+![alt text](image-9.png)  
+
+IF-THEN  
+![alt text](image-10.png)  
+
+IF-THEN-ELSE  
+![alt text](image-11.png)  
+
+IF-THEN-ELSIF  
+![alt text](image-12.png)  
+
+### CASE 조건문  
+
+종류  
+![alt text](image-13.png)  
+
+단순 CASE  
+![alt text](image-14.png)  
+아래와 같음  
+```JAVA
+SWITCH(비교기준):  
+  CASE 값1:
+  CASE 값2:
+  DEFAULT:
+```
+
+단순 CASE 예시  
+![alt text](image-15.png)  
+
+검색 CASE  
+![alt text](image-16.png)  
+
+검색 CASE 예시  
+![alt text](image-17.png)  
+IF문과 비슷하지만 IF문보다 간단하게 쓸 수 있어 편리함  
+
+![alt text](image-18.png)  
+
+## 반복문  
+종류  
+![alt text](image-19.png)  
+
+중단 명령어  
+![alt text](image-20.png)  
+EXIT = BREAK  
+EXIT-WHEN = IF() BREAK  
+
+
+기본 LOOP문  
+![alt text](image-21.png)  
+중단 명령어가 없으면 무한 루프  
+
+WHILE LOOP문  
+![alt text](image-22.png)  
+
+WHILE LOOP문 예시  
+![alt text](image-23.png)  
+
+FOR LOOP  
+![alt text](image-24.png)  
+FOR문과 형식이 약간 다름.  
+
+
+
+FOR LOOP 예시  
+![alt text](image-25.png)  
+
+FOR LOOP REVERSE  
+![alt text](image-26.png)  
+
+FOR LOOP + CONTINUE  
+![alt text](image-27.png)  
+
+## 레코드
+자료형이 각기 다른 데이터를 저장하는 변수(행)  
+행 데이터를 다루는 용도로 사용함.  
+
+선언 예시  
+![alt text](image-28.png)  
+
+INSERT INTO로 레코드 변수를 삽입하는 예시  
+![alt text](image-29.png)  
+
+UPDATE에도 사용 가능.  
+![alt text](image-30.png)  
+
+레코드를 포함하는 레코드  
+![alt text](image-31.png)  
+조인을 한 것 같은 효과가 나타남.  
+
+
+## 컬렉션  
+한 자료형의 데이터를 여러 개 저장하는 복합 자료형  
+열 또는 테이블과 같은 형태로 사용할 수 있음.  
+
+종류  
+![alt text](image-32.png)  
+
+연관 배열  
+![alt text](image-33.png)  
+
+연관 배열 예시  
+![alt text](image-34.png)  
+키는 인덱스 번호로 접근함  
+index by pls_integer 이게 인덱스 선언하는 부분
+text_arr(1) 이게 인덱스  
+
+### 컬렉션 메서드  
+![alt text](image-35.png)  
+
+메서드 종류  
+![alt text](image-36.png)  
+
+정리
+```
+오라클에서는 여러 가지 데이터를 하나의 자료형으로 지정하고 사용하기 위해 직접 정의하는 복합 자료형을 제공합니다.  
+레코드형은 여러 종류의 자료형을 하나의 변수에 저장할 때 사용합니다.  
+컬렉션형은 특정 자료형의 데이터 여러 개를 하나의 변수에 저장할 때 사용합니다.  
+```
+
+//////////////// 여기까지는 대충 알아도 됨  
+
+## 커서  
+![alt text](image-37.png)  
+
+select into는 이거였음  
+![alt text](image-38.png)  
+
+```sql
+-- select into
+set serveroutput on;
+declare 
+    v_dept_row dept%rowtype;
+begin
+    select deptno, dname, loc into v_dept_row
+        from dept
+    where deptno = 40;  -- v_dept_row에 하나의 행만 들어가기 때문에, where절이 필수임. 
+    dbms_output.put_line('deptno : ' || v_dept_row.deptno);
+    dbms_output.put_line('dname : ' || v_dept_row.dname);
+    dbms_output.put_line('loc : ' || v_dept_row.loc);
+end;
+/
+```
+이런 경우에, 명시적 커서로 해결할 수 있음.  
+
+명시적 커서 사용법  
+![alt text](image-39.png)  
+
+명시적 커서 문법  
+![alt text](image-40.png)  
+
+명시적 커서를 이용하여 여러 행 데이터를 가져오는 예시  
+```SQL
+set serveroutput on;
+declare 
+    v_dept_row dept%rowtype;
+    -- 커서 선언
+    cursor c1 is
+        select deptno, dname, loc from dept;
+begin
+    -- 커서 열기
+    open c1;
+        /* 커서 c1을 사용하여 dept로부터 한 행씩 fetch한 뒤, v_dept_row에 삽입하면서
+         행 데이터들을 출력하는 loop*/
+        LOOP
+            fetch c1 into v_dept_row;
+            exit when c1%NOTFOUND;  
+            
+            DBMS_OUTPUT.PUT_LINE('deptno : ' || v_dept_row.deptno ||
+                                ', dname : ' || v_dept_row.dname ||
+                                ', loc   : ' || v_dept_row.loc);
+        end loop;
+    close c1;
+end;
+/
+```
+결과 :  
+![alt text](image-41.png)  
+
+!! exit when의 속성들  
+![alt text](image-42.png)  
+
+![alt text](image-43.png)  
+![alt text](image-44.png)  
+![alt text](image-45.png)  
+![alt text](image-46.png)  
+![alt text](image-47.png)  
+![alt text](image-48.png)  
+![alt text](image-49.png)  
+
+![alt text](image-50.png)  
+![alt text](image-51.png)  
+![alt text](image-52.png)  
+
+## 저장 서브프로그램  
+
+![alt text](image-53.png)  
+![alt text](image-54.png)  
+![alt text](image-55.png)  
+![alt text](image-56.png)  
+
+저장 프로시저는 만들어 놓고 외부 프로그램에서 호출하여 자주 사용.  
+저장 함수는 SQL 내에서 사용.  
+실행할 때마다 컴파일하는게 아니라서, 속도가 빠름.  
+다른 프로그램에서도 호출할 수 있음.  
+
+### 프로시저  
+특정 처리 작업을 수행하는 데 사용하는 저장 서브 프로그램.  
+프로시저 역시 객체임.  
+
+파라미터가 없는 프로시저  
+![alt text](image-57.png)  
+
+파라미터가 없는 프로시저 생성 및 실행 예시
+```sql
+-- 프로시저 생성
+create procedure pro_noparam
+is
+    v_empno number(4) := 7788;
+    v_ename varchar2(10);
+begin
+    v_ename := 'SCOTT';
+    DBMS_OUTPUT.PUT_LINE('v_empno : ' || v_empno);
+    DBMS_OUTPUT.PUT_LINE('v_ename : ' || v_ename);
+end;
+/
+
+-- 프로시저 실행
+execute pro_noparam;
+```
+
+파라미터를 사용하는 프로시저  
+![alt text](image-58.png)  
+
+#### 파라미터를 사용하는 프로시저 생성 및 실행 예시
+```SQL
+create procedure pro_param_in
+    (
+        param1 in number, 
+        param2 number, 
+        param3 number :=3, 
+        param4 number default 4
+    )
+is
+begin
+    DBMS_OUTPUT.PUT_LINE(PARAM1);
+    DBMS_OUTPUT.PUT_LINE(PARAM2);
+    DBMS_OUTPUT.PUT_LINE(PARAM3);
+    DBMS_OUTPUT.PUT_LINE(PARAM4);
+END;
+/
+execute pro_param_in(1,2);
+execute pro_param_in(1,2,35,64);
+```
+만약 위 sql문에서 param2에 default값이 있다면, execute로 인수를 넘겨줄 때 갯수와 순서를 맞춰서 넘겨줘야 함.  
+그러나 default는 건들지 않고 넣고 싶다면  
+```sql
+execute pro_param_in(param1=>10, param3=>30);
+```
+이렇게 변수 명을 직접 지정하면 됨.  
+
+---
+
+변수 선언할 때, 타입으로 in | out을 넣을 수 있음.  
+이 둘을 넣을 때의 차이점은?  
+in은 프로시져를 호출할 때 값을 입력받고,  
+out은 호출할 때 값을 반환함.  
+
+#### out 파라미터를 사용하는 프로시저 생성 및 실행 예시  
+```sql
+create or replace procedure pro_param_out
+(
+    in_empno in emp.empno%type, -- in_empno in number(4), 와 같지만 전자가 유지보수에 용이함.
+    out_ename out emp.ename%type,
+    out_sal out emp.sal%type
+)
+is
+begin
+    -- ename이 out_ename에, sal이 out_sal에 치환됨
+    select ename, sal into out_ename, out_sal
+    from emp
+    where empno = in_empno;
+end;
+/
+-- pro_param_out 파라미터의 반환값을 변수에 저장하여 출력하는 익명 블록
+declare
+    v_ename emp.ename%type;
+    v_sal emp.sal%type;
+begin
+    pro_param_out(7788, v_ename, v_sal);
+    DBMS_OUTPUT.PUT_LINE(v_ename);
+    DBMS_OUTPUT.PUT_LINE(v_sal);
+end;
+/
+```
+
+--- 
+
+IN, OUT 속성을 모두 사용할 수도 있음.  
+
+#### INOUT 파라미터를 사용하는 프로시저 생성 및 실행 예시  
+```sql
+-- 입력받은 값에 2를 곱하여 내보내는 프로시저
+create or replace procedure pro_param_inout
+(
+    inout_no IN OUT number
+)
+is
+begin
+    inout_no := inout_no * 2;
+end;
+/
+-- pro_param_inout 프로시저를, 인수 5를 넣어 호출하는 익명 블록
+declare 
+    num number;
+begin
+    num := 5;
+    pro_param_inout(num);
+    DBMS_OUTPUT.PUT_LINE(num);
+end;
+/
+```
+정리하자면 프로시저의 특징은 return이 없지만, 그 대신에 out 파라미터를 통해 결과를 반환할 수 있음.  
+SQL문에서 직접 사용할 순 없고, 외부 프로그램에서 호출하여 사용함.  
+
+### 함수  
+프로시저와 달리 SQL문에서도 사용할 수 있음.  
+SQL의 함수(MAX, SUM)과 비슷함.  
+PL/SQL의 함수와 다른 점은.  
+
+#### 프로시저와 함수의 차이점  
+![alt text](image-59.png)  
+
+#### 함수 생성  
+![alt text](image-60.png)  
+
+함수에서도 IN,OUT 모드를 사용할 순 있지만, 그렇게 되면 SQL에서 사용할 수 없게 됨.  
+그래서 IN,OUT 모드를 사용하지 않음.  
+![alt text](image-61.png)  
+
+#### 함수 생성 및 실행 예시  
+sal을 인수로 받아 tax%만큼 떼서 반환하는 함수.  
+세금 계산 함수.  
+execute로 실행할 수 있는데, 주로 SQL문에서 사용함.  
+
+```sql
+create or replace function func_aftertax
+(
+    sal number
+)
+return number
+is 
+    tax number := 0.05;
+begin
+    return (round(sal-(sal*tax)));
+end func_aftertax;
+/
+-- PL/SQL문에서 사용
+declare
+    aftertax number;
+begin
+    aftertax := func_aftertax(3000);
+    DBMS_OUTPUT.PUT_LINE(aftertax);
+end;
+/
+-- SQL문에서 사용
+select func_aftertax(3000)
+from dual;
+--
+select empno, ename, sal, func_aftertax(sal) as aftertax
+from emp;
+
+-- 함수 삭제
+drop function func_aftertax;
+```
+
+DATE형식 데이터를 받아 날짜 형식을 바꾸는 함수 예시2  
+```SQL
+CREATE OR REPLACE FUNCTION FUNC_DATE_KOR
+(
+    HIREDATE DATE
+)
+RETURN CHAR
+IS
+BEGIN
+                -- YY/MM/DD -> CHAR YYYY년MM월DD일
+    RETURN TO_CHAR(HIREDATE,'YYYY"년"MM"월"DD"일"');
+END;
+/
+SELECT ENAME, FUNC_DATE_KOR(HIREDATE) AS HIREDATE
+FROM EMP
+WHERE EMPNO = 7369;
+
+```
+
+---
+
+### 패키지  
+연관성 있는 여러 서브프로그램들을 하나로 묶는 것.  
+![alt text](image-62.png)  
+
+패키지의 장점  
+![alt text](image-63.png)  
+
+#### 패키지 명세  
+선언부라고 생각하면 됨.  
+![alt text](image-64.png)  
+
+패키지 명세 작성(패키지 생성)  
+![alt text](image-65.png)  
+
+USER_SOURCE 데이터 사전으로 조회 가능  
+
+#### 패키지 본문  
+![alt text](image-66.png)  
+
+![alt text](image-67.png)  
+
+#### 서브 프로그램 오버로드  
+![alt text](image-68.png)  
+예시  
+![alt text](image-69.png)  
+자바 메서드 오버로드와 똑같음.  
+![alt text](image-70.png)  
+
+#### 패키지 사용  
+![alt text](image-71.png)  
+사용 예시  
+![alt text](image-72.png)  
+
+#### 패키지 삭제  
+패키지의 명세, 본문을 한 번에 삭제할 수도 있고,  
+패키지의 본문만 따로 삭제할 수도 있음.  
+![alt text](image-73.png)  
+
+---
+
+### 트리거(!!중요함!!)  
+이벤트가 발생할 경우에 자동으로 실행되는 기능을 정의하는 서브프로그램.  
+
+#### 주로 사용되는 경우  
+![alt text](image-74.png)  
+![alt text](image-75.png)  
+DML, DDL, 데이터베이스 동작에 설정하는 트랩이라고 할 수 있음.  
+
+#### 트리거 종류  
+![alt text](image-76.png)  
+이 중에서 DML 트리거가 가장 많이 사용됨.  
+
+#### DML 트리거  
+형식  
+![alt text](image-77.png)  
+
+BEFORE DML 트리거 예시  
+```SQL
+CREATE TABLE EMP_TRG AS SELECT * FROM EMP;
+-- EMP_TRG에 INSERT,UPDATE,DELETE가 일어나기 전에 트리거가 발동
+CREATE OR REPLACE TRIGGER TRG_EMP_NODML_WEEKEND
+BEFORE
+INSERT OR UPDATE OR DELETE ON EMP_TRG
+-- 현재 날짜가 토,일일 경우, 에러를 발생시켜 명령 수행 취소
+BEGIN
+    IF TO_CHAR(SYSDATE, 'DY') IN ('토','일') THEN
+        IF INSERTING THEN
+            RAISE_APPLICATION_ERROR(-20000,'주말 사원정보 추가 불가');
+        ELSIF UPDATING THEN
+            RAISE_APPLICATION_ERROR(-20000,'주말 사원정보 변경 불가');
+        ELSIF DELETING THEN
+            RAISE_APPLICATION_ERROR(-20000,'주말 사원정보 삭제 불가');
+        ELSE
+            RAISE_APPLICATION_ERROR(-20000,'주말 사원정보 접근 불가');
+        END IF;
+    END IF;
+END;
+/
+```
+
+AFTER DML 트리거 예시  
+```SQL
+CREATE TABLE EMP_TRG_LOG    -- 테이블 접근 로그 정보를 담을 테이블
+(
+    TABLENAME VARCHAR2(10), -- DML이 수행된 테이블 이름
+    DML_TYPE VARCHAR2(10),  -- DML 명령어 종류
+    EMPNO NUMBER(4),        -- DML의 대상이 된 사원의 번호
+    USER_NAME VARCHAR2(30), -- DML을 수행한 사용자의 이름
+    CHANGE_DATE DATE        -- DML이 수행된 날짜
+);
+
+CREATE OR REPLACE TRIGGER TRG_EMP_LOG
+AFTER
+INSERT OR UPDATE OR DELETE ON EMP_TRG   -- EMP_TRG에 INSERT, UPDATE, DELETE를 수행할 때마다 트리거 발동
+FOR EACH ROW                            -- DML 명령어의 대상이 되는 행마다 트리거가 각각 작동
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES ('EMP_TRG', 'INSERT',:NEW.EMPNO, SYS_CONTEXT('USERENV','SESSION_USER'),SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES ('EMP_TRG', 'UPDATE',:OLD.EMPNO, SYS_CONTEXT('USERENV','SESSION_USER'),SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES ('EMP_TRG', 'DELETE',:OLD.EMPNO, SYS_CONTEXT('USERENV','SESSION_USER'),SYSDATE);
+    END IF;
+END;
+/
+
+SELECT SYS_CONTEXT('USERENV','SESSION_USER') FROM DUAL; -- 접속한 사용자명을 출력하는 구문
+```
+
+```SQL
+-- 트리거 이름을 특정하여 트리거를 활성 | 비활성화
+ALTER TRIGGER TRG_EMP_LOG ENABLE | DISABLE;
+-- 테이블 이름을 특정하여 해당 테이블에 적용된 모든 트리거들을 활성 | 비활성화 
+ALTER TABLE EMP_TRG ENABLE | DISABLE ALL TRIGGERS;
+```
 

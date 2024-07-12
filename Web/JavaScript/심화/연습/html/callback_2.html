@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        td {
+            padding: 10px;
+        }
+        button {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <fieldset>
+            <legend>당신의 신상을 까발립니다</legend>
+            <table>
+                <tr>
+                    <td><label>이름 : <input type="text" id="user_name"></label></td>
+                </tr>
+                <tr>
+                    <td><label>나이 : <input type="text" id="user_age"></label></td>
+                </tr>
+            </table>
+        </fieldset>
+    </form>
+    <button>내 신상 동네방네 소문 내기</button>
+    <script>
+        const text_name = document.querySelector("#user_name");
+        const text_age = document.querySelector("#user_age");
+
+        document.querySelector("button").addEventListener("click",()=>getData(writeData));
+
+        function writeData(name, age){
+            console.log(`!!!!!!!!!당신의 이름은 ${name}이고 나이는 ${age}입니다.!!!!!!!!!!!!`);
+        }
+
+        function getData(callBack){
+            const userName = text_name.value;
+            const userAge = text_age.value;
+            callBack(userName,userAge);
+        }
+    </script>
+</body>
+</html>
