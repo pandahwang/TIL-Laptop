@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>원기둥의 부피 구하기</title>
+  <style>
+    td {
+      width: 200px;
+    }
+    
+  </style>
+</head>
+<body>
+  <h1>원기둥 부피 구하기</h1>
+  <p>원기둥의 지름과 높이가 주어졌을 때, 객체를 사용해 원기둥의 부피를 구하는 프로그램을 작성하시오.(결괏값은 소숫점 이하 2자리까지)</p>
+  <form>
+    <fieldset>
+      <legend><b>원기둥 생성</b></legend>
+      <table>
+        <tr>
+          <td>
+            <label for="radius">원기둥 지름 입력 : </label>
+          </td>
+          <td>
+            <input type="text" id="radius">
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <label for="height">원기둥 높이 입력 : </label>
+          </td>
+          <td>
+            <input type="text" id="height">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button id="createCylinder">생성</button>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <span id="created"></span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button id="getVol" style="display:none">부피 구하기</button>
+          </td>
+          <td>
+            <span id="volResult"></span>
+          </td>
+        </tr>
+      </table>
+    </fieldset>
+  </form>
+
+  <!-- <script src="../../cylinder.jsp"></script> -->
+   <script>
+    const createButton = document.querySelector("#createCylinder");
+    const inputRadius = document.querySelector("#radius");
+    const inputHeight = document.querySelector("#height");
+    const createdCyl = document.querySelector("#created");
+    const getVolButton = document.querySelector("#getVol");
+    const volResult = document.querySelector("volResult");
+    
+    
+    createButton.addEventListener("click",e=>{
+      cylinder = new Cylinder(parseInt(inputRadius.value),parseInt(inputHeight.value));
+      e.preventDefault();
+      createdCyl.innerText="";
+      createdCyl.innerText=`지름 : ${inputRadius.value}, 높이 : ${inputHeight.value}인 원기둥이 생성되었습니다.`;
+      getVolButton.style.display = "block";
+    });
+    
+    getVolButton.addEventListener("click", (e)=>{
+      e.preventDefault();
+      const result = cylinder.getVol();
+      volResult.innerText=`부피 : ${result}`;
+    })
+
+    class Cylinder{
+      constructor(radius, height){
+        this.radius = radius;
+        this.height = height;
+      }
+      getVol() {
+        let cylinderVol = 0;
+        let circleSize = 0;
+        circleSize = 3.14 * (this.radius/2)**2;
+        cylinderVol = (circleSize * this.height).toFixed(2);
+        return cylinderVol;
+      }
+    }
+   </script>
+</body>
+</html>
