@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전철 노선</title>
+  <style>
+    body {
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    button {
+      width:150px;
+      padding:10px 20px;
+    }
+    button:hover {
+      cursor:pointer;
+    }
+    #result {
+      margin-top:10px;
+      padding:20px;
+      width: 300px;      
+      text-align:center;
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>경강선 노선</h1>
+  <button>다음 역</button>
+  <span id="result">출발!</span>
+  <script>
+    function* generator() {
+      yield '판교';
+      yield '이매';
+      yield '삼동';
+      yield '경기광주';
+      yield '초월';
+      yield '곤지암';
+      yield '신둔도예촌';
+      yield '이천';
+      yield '부발';
+      yield '세종대왕릉';
+      yield '여주';
+    }
+    const button = document.querySelector("button");
+    const result = document.querySelector("#result");
+    const stations  = generator();
+
+    button.addEventListener("click", (e)=>{
+      e.preventDefault();
+      let station = stations.next();
+      if(station.done !== true){
+        result.innerHTML= `${station.value}`
+        // result.appendChild(document.createTextNode(`${station.value}`));
+      }
+      else{
+        result.innerHTML = `종점!`;
+        // result.appendChild(document.createTextNode(`종점!`));
+        // button.style.display = 'none';
+        button.disabled = true;
+      }
+    })
+  </script>
+</body>
+</html>

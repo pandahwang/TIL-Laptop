@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      // Promise 방식
+      let likePizza = false;
+      const pizza = new Promise((resolve, reject) => {
+        if (likePizza) {
+            // 전달해줄 문자열 지정
+            resolve("피자를 주문합니다.");
+        } else {
+            // 전달해줄 문자열 지정
+          reject("피자를 주문하지 않습니다.");
+        }
+      });
+      pizza
+        .then(result => console.log(result))
+        .catch(result => console.log(result))
+        .finally(()=> console.log('완료'));
+    </script>
+  </body>
+</html>

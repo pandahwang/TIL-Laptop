@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 정보 가져오기</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;  
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>상품 정보</h1>
+
+    <div id="result"></div>
+  </div>
+  <script>
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://reqres.in/api/products/10");
+    xhr.send();
+
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState == 4 && xhr.status == 200){
+        const items = JSON.parse(xhr.responseText);
+        renderHTML(items);
+        }
+      }
+      
+      function renderHTML(items) {
+        let output = "";
+        output +=  `
+           <h3>상품명 : ${items.data.name}</h3>
+           <h3>생산년도 : ${items.data.year}</h3>
+           <h3>상품 설명 : ${items.support.text}</h3>
+           `;
+        document.querySelector("#result").innerHTML = output;
+      }
+      
+  </script>
+</body>
+</html>

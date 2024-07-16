@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON</title>
+  <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+  <div id="result"></div>
+  <script>
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET","student.json");
+    xhr.send(); // 리퀘스트 발생
+
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState == 4 && xhr.status == 200){
+        const student = JSON.parse(xhr.responseText);
+        document.querySelector("#result").innerHTML = `
+        <h1>${student.name}</h1>
+        <ul><li>전공 : ${student.major}</li>
+            <li>학년 : ${student.grade}</li>
+        </ul>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

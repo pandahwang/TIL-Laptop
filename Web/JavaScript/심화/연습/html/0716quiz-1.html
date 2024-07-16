@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수강생 정보 표시하기</title>
+</head>
+<body>
+  <script>
+    class Lecture {
+      constructor(hasTutor, lectID, members){
+        this.hasTutor = hasTutor;
+        this.lectID = lectID;
+        this.members = members;
+      }
+    }
+
+    const lecture1 = new Lecture(true, "L001", ["Ahn","Han","Park"])
+    const lecture2 = new Lecture(false, "L002", ["Choi","Kim"])
+    let students;
+    let tutor;
+
+    function getStudents(lecture){
+      // lecture.hasTutor ? [tutor, ...students]= lecture.members : [...students] = lecture.members;
+      if(lecture.hasTutor == true){
+        [tutor, ...students]= lecture.members;
+        console.log(`강의 : ${lecture.lectID}, 강사: ${tutor},수강생 : ${students}`);
+      } 
+      else {
+        [...students] = lecture.members;
+        console.log(`강의 : ${lecture.lectID}, 수강생 : ${students}`);
+      }
+    }
+  </script>
+</body>
+</html>
