@@ -1709,12 +1709,17 @@ DDL로 설정할 수 있음.
 
   #### FOREIGN KEY 제약조건 설정  
   ```SQL
-  -- FOREIGN KEY 제약조건 설정
+  -- 테이블 생성하면서 FOREIGN KEY 제약조건 설정
   CREATE TABLE TABLE_NAME(
   ...
-  row_name row_type CONSTRAINT cosntraint_name REFERENCES TABLE_NAME(ROW_NAME)
+  row_name row_type CONSTRAINT constraint_name REFERENCES TABLE_NAME(ROW_NAME)
   );
   -- FOREIGN KEY라고 지정하지 않고, REFERENCE 키워드 + 연결할 테이블명(연결할 열명)로 연결함.
+
+  -- 아웃라인에서 FOREIGN KEY 지정
+  ALTER TABLE TABLE_NAME
+    ADD CONSTRAINT constraint_name FOREIGN KEY (row_name) 
+    REFERENCES TABLE_NAME(ROW_NAME);
   ```
   외래키 특징 :  
   자식 레코드가 있으면, 해당 열을 삭제할 수 없음.  
