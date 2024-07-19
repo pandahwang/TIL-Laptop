@@ -1,7 +1,51 @@
+# WWW  
+하이퍼 텍스트 : 인터넷에 존재하는 문서와, 문서를 클릭만으로 쉽게 이동할 수 있는 것.  
+
+정적 페이지 : 항상 바뀌지 않고 그대로인 페이지. 말 그대로 웹 문서.  
+서버는 변화가 없는 정해진 페이지를 반환함.  
+
+동적 페이지 : 클라이언트의 요청 발생에 따라 항상 변하는 동적 페이지.  
+검색, 로그인, 결제 등이 동적 웹 서비스가 필요한 업무.  
+이를 구현하기 위해 ASP, PHP, JSP 같은 웹 프로그래밍 언어 등장.  
+
+![alt text](../image/web_languages.PNG)  
+
+
 # 웹 서버  
-보통 Web 서버와 WAS로 만듦  
-Web 서버는 클라이언트가 요청한 정적 정보를 전달함.  
-WAS는 DBMS로부터 실시간, 동적 정보를 가공, 전달함.  
+보통 WEB 서버와 WAS(Web Application Server)로 만듦  
+WEB 서버는 클라이언트가 요청한 정적 정보를 전달함.(간단한 정보 처리)  
+WAS는 DBMS로부터 실시간, 동적 정보를 가져와 가공<sup>(조립)</sup>하여 전달함(복잡한 정보 처리).  
+
+![alt text](../image/client_server.PNG)  
+
+주소/도메인을 통해 웹에 접속, 서버에 있는 file을 요청.  
+`/` 뒤에 있는 내용이 file 경로.  
+
+WEB 서버 : 클라이언트의 요청을 가장 먼저 받는 서버.  
+요청에 따른 정적 페이지를 응답함.  
+
+WAS는 예를 들어 실시간 날씨 정보를 가져온다 하면, Ajax를 통해 기상청으로부터 실시간 날씨 동적 정보를 가져와 가공하여 Client에게 전달  
+
+WAS가 WEB 역할을 할 수는 있으나, WAS 서버의 부하가 증가할 수 있기 때문에 분리하여 구성함.  
+웹 서버 : Apache Server, IIS, Nginx  
+웹 애플리케이션 서버 : Tomcat, JBoss, Jeus  
+
+웹을 만들려면 WEB, WAS 서버를 잘 구성하는 것이 중요한데 Spring의 틀을 통해 웹을 제작하기 수월해졌음.  
+
+JAVA는 JVM에서 돌아간다면, WEB-JAVA는 Spring Container에서 돌아감.  
+
+이 file을 만드는 것이, 즉 사용자에게 보여지는 부분을 만드는 것이 Front-end.  
+(정적 = front-end, 동적=back-end 인 건 아님.)  
+
+그럼 JSP랑 Spring이랑 뭐가 다른 거임?  
+JSP : HTML 문서에 내부적으로 자바 문법을 사용할 수 있게 하는 웹페이지 스크립트 언어.  
+Spring Framework : 다양한 개발요소를 빠르게 적용할 수 있게 만들어 놓은 도구  
+
+JSP는 웹 페이지 영역에서 사용되고, Spring은 웹 서비스의 전반적인 환경을 구성함.  
+즉 JSP는 Spring을 통해 구죽한 환경의 일부분임.  
+<a href="https://velog.io/@asas33/%EC%9B%B9%EA%B0%9C%EB%B0%9C-jsp%EC%99%80-servlet..-%EC%9D%B4%EB%93%A4%EA%B3%BC-spring%EC%82%AC%EC%9D%B4%EC%9D%98-%EA%B4%80%EA%B3%84-%EA%B6%81%EA%B8%88%ED%95%9C%EA%B1%B4-%EB%AA%BB%EC%B0%B8%EC%95%84  ">JSP와 Spring의 차이점</a>  
+
+
 
 # 웹서비스의 종류  
 웹 서비스는 크게 두 종류로 나뉨.  

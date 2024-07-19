@@ -430,7 +430,7 @@ WHERE 조건의 개수 제한은 없음.
     ```
     SELECT * FROM SOME_TABLE
     WHERE SOME_COLUMN LIKE 'A\_A%' ESCAPE '\';
-    -- \ 바로 뒤에 있는 _를 와일다 카드 기호가 아닌 데이터에 포함된 문자로 인식하라는 의미 --
+    -- \ 바로 뒤에 있는 _를 와일드 카드 기호가 아닌 데이터에 포함된 문자로 인식하라는 의미 --
     ```
 
   - IS NULL 연산자  
