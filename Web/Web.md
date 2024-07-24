@@ -52,9 +52,14 @@ JSP는 웹 페이지 영역에서 사용되고, Spring은 웹 서비스의 전�
 `SOAP`와 `REST`  
 
 SOAP(Simple Object Access Protocol)  
-XML 기반 메세지 교환을 위한 표준 통신 프로토콜 
+XML 기반 메세지 교환을 위한 표준 통신 프로토콜  
+
+SOAP와 WSDL에 대한 설명 : https://brewagebear.github.io/soap-and-wsdl/  
+WSDL에 대한 상세 설명 문서 : https://www.w3.org/TR/wsdl.html  
 
 REST(Representational State Transfer)  
+
+RESTful이란? : https://velog.io/@te-ing/http-method%EC%99%80-RESTful-API  
 
 https://www.techtarget.com/searchapparchitecture/tip/REST-vs-SOAP-Choosing-the-best-web-service#:~:text=Web%20services%20are%20of%20two,such%20as%20HTTP%20and%20SMTP.  
 
