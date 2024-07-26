@@ -1,8 +1,10 @@
+# STS Spring MVC Project  
+
 ## 패키지 구조  
 
 참고 사이트 : https://dig06161.github.io/2022/03/28/make-spring-project/  
 
-![alt text](image-13.png)  
+![alt text](images/image-13.png)  
 
 기본적인 코드 작성은 com.company.hello 에 작성하게 된다.  
 
@@ -32,7 +34,7 @@ Dispatcher Servlet 동작 구조 :
 
 ---
 
-![alt text](image-15.png)  
+![alt text](images/image-15.png)  
 `View Resolver`에게 `WEB-INF/views/` 경로와 `.jsp` 확장자를 설정해줌.  
 
 
@@ -132,8 +134,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller	// 컨트롤러임을 명시
 public class MemberController {
-	
-	@RequestMapping("/signUp")	// 어떤 경우에 이 메서드를 실행할지 명시. /signUp 디렉토리에 연결 요청하면 실행
+	@RequestMapping("/signUp")	// 어떤 경우에 이 메서드를 실행할지 명시. /signUp 디렉토리에 연결 요청하면 실행 
 	public String signUp() {
 		
 		return "sign_up";		// 연결할 jsp 파일명을 반환.
@@ -184,6 +185,10 @@ public class MemberController {
 기본 페이지 경로 뒤에 signUp, signIn을 입력하여 연결 요청하면, 해당 페이지로 이동.  
 즉, jsp 파일들을 통해 만들어진 html을 볼 수 있게 됨.  
 
+@RequestMapping이 붙은 메서드에  
+@ResponseBody 애노테이션을 사용하면, "문자열" sign_up을 그대로 화면에 반환함.  
+여기에 반환값으로 html 코드를 작성하면 작성한 대로 출력됨.  
+
 ---
 
 ```
@@ -200,7 +205,7 @@ public class MemberController {
 5. Controller 객체는 클라이언트의 요청을 받아서 사용자의 요청에 부합하는 메서드를 실행한다. 그리고 해당 메서드는 Service와 DAO 등을 이용해서 사용자의 요청에 대한 작업을 진행한다. 메서드의 작업이 완료되면 View 정보를 반환하고, 반환된 정보를 이용해서 JSP 파일이 실행된다. 
 ```
 
-# 컨트롤러와 jsp 연결 회원가입 예시  
+# 컨트롤러와 jsp 연결 (회원가입) 예시  
 
 ▼ jsp에 값을 입력받을 수 있는 form을 아래와 같이 작성  
 
@@ -217,7 +222,7 @@ public class MemberController {
 
 	<h3>회원 가입 페이지입니다.</h3>
 	<!-- action에 적은 경로로 데이터 전달 -->
-	<form action="/hello/signUpConfirm">
+	<form action="/signUpConfirm">
 		ID : <input type="text" name="m_id"><br/>
 		PW : <input type="password" name="m_pw"><br/>
 		MAIL : <input type="text" name="m_mail"><br/>
@@ -258,7 +263,7 @@ public class MemberController {
 								@RequestParam String m_pw,
 								@RequestParam String m_mail,
 								@RequestParam String m_phone) {
-		
+
 		System.out.println("[MemberController] signUpConfirm()");
 		
 		System.out.println("m_id : " + m_id());
@@ -270,6 +275,39 @@ public class MemberController {
 	}
 }
 ```
+@RequestParam으로 입력값들을 각각 불러올 수 있지만, 코드가 길어질 수 있음.  
+때문에 입력값들을 한꺼번에 저장할 객체, 즉 Model을 만들어 사용하면 훨씬 간편해짐.  
+
+▼ 아래는 입력값들을 담을 MemberVO 클래스  
+
+```java
+package com.company.hello.member.mo;
+
+// 데이터를 담을 Model(바구니)
+// 변수가 jsp input name값과 같아야 함.
+public class MemberVo {
+	private String m_id;
+	private String m_pw;
+	private String m_mail;
+	private String m_phone;
+	
+	// getter setter가 없으면 500 오류 발생
+	public String getM_id() {return m_id;}
+	public void setM_id(String m_id) {this.m_id = m_id;}
+	
+	public String getM_pw() {return m_pw;}
+	public void setM_pw(String m_pw) {this.m_pw = m_pw;}
+	
+	public String getM_mail() {return m_mail;}
+	public void setM_mail(String m_mail) {this.m_mail = m_mail;}
+	
+	public String getM_phone() {return m_phone;}
+	public void setM_phone(String m_phone) {this.m_phone = m_phone;}
+
+}
+
+```
+
 
 ## 서비스 객체  
 ▼ 생성 방법  
@@ -284,11 +322,7 @@ public class MemberService {
 	public int signUpConfirm(MemberVo memberVo) {
 		
 		System.out.println("[MemberService] signUpConfirm()");
-		System.out.println("m_id : " + memberVo.getM_id());
-		System.out.println("m_pw : " + memberVo.getM_pw());
-		System.out.println("m_mail : " + memberVo.getM_mail());
-		System.out.println("m_phone : " + memberVo.getM_phone());
-		
+
 		return 0;
 	}
 }
@@ -318,13 +352,7 @@ public class MemberController {
 	public String signUpConfirm(MemberVo memberVo) {
 		
 		System.out.println("[MemberController] signUpConfirm()");
-		
-		System.out.println("m_id : " + memberVo.getM_id());
-		System.out.println("m_pw : " + memberVo.getM_pw());
-		System.out.println("m_mail : " + memberVo.getM_mail());
-		System.out.println("m_phone : " + memberVo.getM_phone());
-		
-		
+
 		memberService.signUpConfirm(memberVo);
 		return null;
 	}
@@ -473,3 +501,26 @@ MemberService.java에 아래 내용 추가.
 -> memberDB Map에 MemberVo 데이터가 저장됨  
 -> 저장함과 동시에 MemberDao의 printAllMember 메서드를 실행  
 -> memberDB 내 모든 값을 출력  
+
+## DB 내 데이터와 입력값 비교  
+회원 가입 기능, 로그인 기능을 간단히 구현한 예시  
+
+
+정리  
+```
+- @RequestParam을 이용하면 사용자가 입력한 정보를 컨트롤러에서 하나씩 받을 수 있다.
+
+- 서버에서는 클라이언트가 전송한 데이터를 @RequestParam을 이용해서 받을 수 있다.
+@RequestParam 다음에 데이터 타입과 변수명을 명시하면 된다. 이때 데이터 타입은 스프링이 자동으로 형변환 한다.
+
+- @RequestParam을 이용할 때 데이터의 개수가 많아지는 경우 코드가 길어지는 단점이 있다. 
+이런 경우 VO 객체를 이용한다. 스프링에서는 데이터 이름을 이용해서 클라이언트에서 전송된 데이터를 VO 객체의 멤버 필드에 자동으로 할당한다. 
+
+- 서비스 객체 생성과 이용하는 데에는 3가지 방법이 있는데, 애너테이션을 명시하는 방법을 주로 사용한다. 
+1. 객체 생성 연산자(new)를 이용해서 서비스 객체를 생성하고 이용한다.
+2. 스프링 설정 파일을 이용해서 스프링 컨테이너에 빈 객체로 생성하고, 의존 객체 자동 주입 방법을 이용해서 서비스 객체를 이용한다.
+3. 서비스 클래스에 애너테이션을 명시해서 스프링 컨테이너에 빈 객체를 생성하고, 의존 객체 자동 주입 방법을 이용해서 서비스 객체를 이용한다. 
+
+- DAO의 경우 데이터베이스와 통신하는 객체이다. DAO는 서비스에서 데이터베이스 작업이 필요한 경우 호출하면 되므로, 
+서비스 객체에 멤버 필드로 선언하고 @Autowired를 이용해서 의존 객체를 자동 주입하면 된다.
+```
