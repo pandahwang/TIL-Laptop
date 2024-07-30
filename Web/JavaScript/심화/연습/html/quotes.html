@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>random quotes</title>
+    <style>
+        body{
+            background-color: #444;
+        }
+        #result{
+            color: white;
+            margin: auto;
+            margin-right: 20%;
+            position: absolute;
+            top: 40%;
+            left:10%;
+        }
+        h1{
+            font-family:serif;
+        }
+        p {
+            font-family:inherit;
+            font-style: italic;
+        }
+        
+    </style>
+</head>
+<body>
+    
+    <div id="result"></div>
+
+
+    <script>
+        const url = "http://dummyjson.com/quotes";
+        const result = document.querySelector("#result");
+
+        async function init() {
+            const data = await fetch(url);
+            const json = await data.json();
+            await display(json);
+        }
+        
+        async function display(json){
+            let output="";
+            let indexnum = Math.floor(Math.random()*30);
+            const quote = json.quotes[indexnum].quote; 
+            const author = json.quotes[indexnum].author; 
+            output += `<h1>${quote}</h1>
+                        <p> - ${author}</p>`;
+            result.innerHTML = output;
+        }
+        
+        init();
+    </script>
+</body>
+</html>
