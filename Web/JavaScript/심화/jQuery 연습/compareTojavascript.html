@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style type="text/css">
+      #navigation li {
+        list-style: none;
+        float: left;
+        padding: 5px;
+      }
+      #navigation {
+        cursor: pointer;
+      }
+      #navigation .selected {
+        background-color: red;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="navigation">
+      <li>HTML</li>
+      <li>CSS</li>
+      <li>javascript</li>
+      <li class="selected">jQuery</li>
+      <li>PHP</li>
+      <li>mysql</li>
+    </ul>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function(){
+        $("#navigation li").on("click",function(){
+          $("#navigation li").removeClass("selected");
+          $(this).addClass("selected");
+        })
+      }); 
+    </script>
+  </body>
+</html>
