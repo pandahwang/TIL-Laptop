@@ -222,3 +222,17 @@ $("input").focus((e)=> $(e.target).next("span").html("focus"))
 .fadeIn .fadeOut .show .hide .slideUp .slideDown 등이 있음.  
 속성으로 slow, fast 등을 넣을 수 있음.  
 delay(숫자)로 애니메이션 간 딜레이를 줄 수 있음  
+
+# Ajax  
+
+$.ajax(setting)  
+setting 안에 들어가는건 JS 객체  
+
+객체의 내용은 다음과 같음  
+
+data : key/value  
+data type : json(응답형식)  
+type : GET/POST(요청형식)  
+url : 서버의 url  
+success : 이벤트 핸들러 = 서버와의 통신 후, 결과를 가져왔을 때 지정한 이벤트 핸들러 함수가 실행됨.  
+
