@@ -10,5 +10,23 @@
     <div id="result"></div>
     <input type="text" id="msg">
     <input type="button" value="결과받기" id="getResult">
+    <script>
+        
+        $("#getResult").click(function() {
+            $("#result").html("");
+            $.ajax({
+                url: "http://localhost:9191/ajax_server.php",
+                dataType: "json",
+                type: "POST",
+                data: { msg: $("#msg").val()},
+                success: function(result) {
+                    if(result["result"]==true) {
+                        $("#result").html(result["msg"]);
+                    }
+                },
+            });
+        });
+
+    </script>
 </body>
 </html>

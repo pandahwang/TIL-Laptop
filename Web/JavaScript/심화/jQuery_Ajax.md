@@ -225,6 +225,8 @@ delay(숫자)로 애니메이션 간 딜레이를 줄 수 있음
 
 # Ajax  
 
+요청을 서버가 아닌 프론트쪽에서 처리할 수 있게 해줌.  
+
 $.ajax(setting)  
 setting 안에 들어가는건 JS 객체  
 
@@ -236,3 +238,74 @@ type : GET/POST(요청형식)
 url : 서버의 url  
 success : 이벤트 핸들러 = 서버와의 통신 후, 결과를 가져왔을 때 지정한 이벤트 핸들러 함수가 실행됨.  
 
+
+폼 데이터를 가져와 post 요청을 보내는 예시  
+
+```javascript
+  let form = document.create_account_form;
+
+  const formData = {
+      a_m_id: form.a_m_id.value,
+      a_m_pw: form.a_m_pw.value,
+      a_m_name: form.a_m_name.value,
+      a_m_gender: form.a_m_gender.value,
+      a_m_part: form.a_m_part.value,
+      a_m_position: form.a_m_position.value,
+      a_m_mail: form.a_m_mail.value,
+      a_m_phone: form.a_m_phone.value					
+  };
+  
+  $.ajax({
+    url: "/library/admin/member/createAccountConfirm",
+    type: "POST",
+    data: formData,
+    dataType: "html",
+    success: (response) => {console.log("회원가입 성공");},
+    error: (xhr, status, error) => {console.log("회원가입 실패");}
+  });
+  // 이중 요청을 막기 위해서
+  // form의 submit button은 비활성화 시켜야함. return false;
+```
+
+로그인 창을 새 창에서 여는 방법(?)  
+```javascript
+  function login() {$.ajax({
+    url: "/library/admin/member/loginForm",
+    type: "GET",
+    dataType:"html",
+    success: (response)=>{
+      const newWindow = window.open('','_blank');
+      newWindow.document.open();
+      newWindow.document.write(response);
+      newWindow.close();
+      },
+      error: (xhr, status, error) => { alert('로그인이 실패하였습니다.');}
+    })
+  }
+```
+
+로그인 결과 창을 새 창에서 여는 방법  
+```javascript
+			const formData = {
+					a_m_id: form.a_m_id.value,
+					a_m_pw: form.a_m_pw.value
+			};
+			
+			$.ajax({
+				url: "/library/admin/member/loginConfirm",
+				type: "POST",
+				data: formData,
+				dataType: "html",
+				success: (response)=>{
+					document.open();
+					document.write(response);
+					document.close();
+				},
+				error: (xhr, status, error) => { alert('로그인 실패');}
+				
+			});
+```
+
+
+여태 배운 비동기통신 방법들  
+XMLHttpRequest, fetch, ajax  
